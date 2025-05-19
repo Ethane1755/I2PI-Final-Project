@@ -52,12 +52,6 @@ git push //設定過後就會自動上傳到github上面的那個branch了
 
 就照著他的按鈕按，如果有conflict就在裡面編輯
 
-![sc](HowToGit resources/Screenshot 2025-05-19 at 4.44.52 PM.png)
-
-![sc1](HowToGit resources/Screenshot 2025-05-19 at 4.45.10 PM.png)
-
-![sc2](HowToGit resources/Screenshot 2025-05-19 at 4.45.21 PM.png)
-
 merge以後也不用刪branch，反正就一個人用一個這樣
 
 
