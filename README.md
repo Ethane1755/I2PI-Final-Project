@@ -16,3 +16,8 @@
     - git 設定檔
 - HowToGit.md
 - README.md
+
+### 可能的資源
+https://bdragon1727.itch.io/basic-pixel-health-bar-and-scroll-bar
+https://darkpixel-kronovi.itch.io/mecha-golem-free
+https://darkpixel-kronovi.itch.io/archer-hero

@@ -9,21 +9,27 @@
 #include "../scene/gamescene.h"
 #include <stdio.h>
 #include <stdbool.h>
+
 /*
    [Character function]
+   合併 stop 和 atk 為 idle 狀態
+   狀態只剩 idle, move
 */
+
 Elements *New_Character(int label)
 {
     Character *pDerivedObj = (Character *)malloc(sizeof(Character));
     Elements *pObj = New_Elements(label);
-    // setting derived object member
     // load character images
-    char state_string[3][10] = {"stop", "move", "attack"};
-    for (int i = 0; i < 3; i++)
+    char state_string[2][10] = {"idle", "move"};
+    for (int i = 0; i < 2; i++)
     {
         char buffer[50];
         sprintf(buffer, "assets/image/chara_%s.gif", state_string[i]);
         pDerivedObj->gif_status[i] = algif_new_gif(buffer, -1);
+        if (!pDerivedObj->gif_status[i]) {
+            printf("Failed to load %s\n", buffer);
+        }
     }
     // load effective sound
     ALLEGRO_SAMPLE *sample = al_load_sample("assets/sound/atk_sound.wav");
@@ -36,13 +42,14 @@ Elements *New_Character(int label)
     pDerivedObj->height = pDerivedObj->gif_status[0]->height;
     pDerivedObj->x = 300;
     pDerivedObj->y = HEIGHT - pDerivedObj->height - 60;
-    pDerivedObj->hitbox = New_Rectangle(pDerivedObj->x,
-                                        pDerivedObj->y,
-                                        pDerivedObj->x + pDerivedObj->width,
-                                        pDerivedObj->y + pDerivedObj->height);
+    pDerivedObj->hitbox = New_Rectangle(
+        pDerivedObj->x,
+        pDerivedObj->y,
+        pDerivedObj->x + pDerivedObj->width,
+        pDerivedObj->y + pDerivedObj->height
+    );
     pDerivedObj->dir = false; // true: face to right, false: face to left
-    // initial the animation component
-    pDerivedObj->state = STOP;
+    pDerivedObj->state = IDLE;
     pDerivedObj->new_proj = false;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
@@ -52,102 +59,105 @@ Elements *New_Character(int label)
     pObj->Destroy = Character_destory;
     return pObj;
 }
-void Character_update(Elements *self)
-{
-    // use the idea of finite state machine to deal with different state
+
+void Character_update(Elements *self) {
     Character *chara = ((Character *)(self->pDerivedObj));
-    if (chara->state == STOP)
-    {
-        if (key_state[ALLEGRO_KEY_SPACE])
-        {
-            chara->state = ATK;
-        }
-        else if (key_state[ALLEGRO_KEY_A])
-        {
+    // idle 狀態自動攻擊
+    if (chara->state == IDLE) {
+        // 有移動鍵就切換到 MOVE
+        if (key_state[ALLEGRO_KEY_W]) {
             chara->dir = false;
             chara->state = MOVE;
         }
-        else if (key_state[ALLEGRO_KEY_D])
-        {
-            chara->dir = true;
-            chara->state = MOVE;
-        }
-        else
-        {
-            chara->state = STOP;
-        }
-    }
-    else if (chara->state == MOVE)
-    {
-        if (key_state[ALLEGRO_KEY_SPACE])
-        {
-            chara->state = ATK;
-        }
-        else if (key_state[ALLEGRO_KEY_A])
-        {
+        else if (key_state[ALLEGRO_KEY_A]) {
             chara->dir = false;
-            _Character_update_position(self, -5, 0);
             chara->state = MOVE;
         }
-        else if (key_state[ALLEGRO_KEY_D])
-        {
+        else if (key_state[ALLEGRO_KEY_S]) {
             chara->dir = true;
-            _Character_update_position(self, 5, 0);
             chara->state = MOVE;
         }
-        if (chara->gif_status[chara->state]->done)
-            chara->state = STOP;
-    }
-    else if (chara->state == ATK)
-    {
-        if (chara->gif_status[chara->state]->done)
-        {
-            chara->state = STOP;
-            chara->new_proj = false;
+        else if (key_state[ALLEGRO_KEY_D]) {
+            chara->dir = true;
+            chara->state = MOVE;
         }
-        if (chara->gif_status[ATK]->display_index == 2 && chara->new_proj == false)
-        {
+        // idle動畫循環時自動攻擊
+        if (chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 7 && chara->new_proj == false) {
             Elements *pro;
-            if (chara->dir)
-            {
-                pro = New_Projectile(Projectile_L,
-                                     chara->x + chara->width - 100,
-                                     chara->y + 10,
-                                     5);
-            }
-            else
-            {
+            if (chara->dir) {
                 pro = New_Projectile(Projectile_L,
                                      chara->x - 50,
                                      chara->y + 10,
                                      -5);
+            } else {
+                pro = New_Projectile(Projectile_L,
+                                     chara->x + chara->width - 100,
+                                     chara->y + 10,
+                                     5);
+                
             }
             _Register_elements(scene, pro);
             chara->new_proj = true;
         }
+        if (chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) {
+            chara->new_proj = false;
+        }
+    }
+    else if (chara->state == MOVE) {
+        if (key_state[ALLEGRO_KEY_W]) {
+            chara->dir = false;
+            _Character_update_position(self, 0, -5);
+            chara->state = MOVE;
+        }
+        else if (key_state[ALLEGRO_KEY_A]) {
+            chara->dir = true;
+            _Character_update_position(self, -5, 0);
+            chara->state = MOVE;
+        }
+        else if (key_state[ALLEGRO_KEY_S]) {
+            chara->dir = false;
+            _Character_update_position(self, 0, 5);
+            chara->state = MOVE;
+        }
+        else if (key_state[ALLEGRO_KEY_D]) {
+            chara->dir = false;
+            _Character_update_position(self, 5, 0);
+            chara->state = MOVE;
+        }
+        // 沒有移動鍵就回到 IDLE
+        else {
+            chara->state = IDLE;
+        }
+        if (chara->gif_status[MOVE] && chara->gif_status[MOVE]->done)
+            chara->state = IDLE;
     }
 }
+
 void Character_draw(Elements *self)
 {
-    // with the state, draw corresponding image
     Character *chara = ((Character *)(self->pDerivedObj));
     ALLEGRO_BITMAP *frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     if (frame)
     {
         al_draw_bitmap(frame, chara->x, chara->y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
-    if (chara->state == ATK && chara->gif_status[chara->state]->display_index == 2)
+    // idle動畫到特定幀時播放攻擊音效
+    if (chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound)
     {
         al_play_sample_instance(chara->atk_Sound);
     }
 }
+
 void Character_destory(Elements *self)
 {
     Character *Obj = ((Character *)(self->pDerivedObj));
-    al_destroy_sample_instance(Obj->atk_Sound);
-    for (int i = 0; i < 3; i++)
-        algif_destroy_animation(Obj->gif_status[i]);
-    free(Obj->hitbox);
+    if (Obj->atk_Sound)
+        al_destroy_sample_instance(Obj->atk_Sound);
+    for (int i = 0; i < 2; i++)
+        if (Obj->gif_status[i])
+            algif_destroy_animation(Obj->gif_status[i]);
+    if (Obj->hitbox)
+        free(Obj->hitbox);
     free(Obj);
     free(self);
 }
@@ -158,8 +168,10 @@ void _Character_update_position(Elements *self, int dx, int dy)
     chara->x += dx;
     chara->y += dy;
     Shape *hitbox = chara->hitbox;
-    hitbox->update_center_x(hitbox, dx);
-    hitbox->update_center_y(hitbox, dy);
+    if (hitbox) {
+        hitbox->update_center_x(hitbox, dx);
+        hitbox->update_center_y(hitbox, dy);
+    }
 }
 
 void Character_interact(Elements *self) {}
