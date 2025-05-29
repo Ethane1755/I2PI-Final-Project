@@ -1,7 +1,7 @@
 #include "teleport.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
-#include "charater.h"
+#include "character.h"
 #include <stdbool.h>
 /*
    [teleport function]

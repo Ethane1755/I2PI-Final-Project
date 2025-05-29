@@ -18,5 +18,6 @@ void Rectangle_update_center_x(Shape *self, int x);
 void Rectangle_update_center_y(Shape *self, int y);
 ShapeType Rectangle_getType();
 Shape *New_Rectangle(double x1, double y1, double x2, double y2);
+void Rectangle_update(Shape *self, double x1, double y1, double x2, double y2);
 
 #endif

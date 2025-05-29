@@ -1,7 +1,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
-#include "charater.h"
+#include "character.h"
 #include "projectile.h"
 #include "../scene/sceneManager.h"
 #include "../shapes/Rectangle.h"

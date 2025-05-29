@@ -23,6 +23,7 @@ typedef double (*fptrCenterY)(Shape *);
 typedef void (*fptrUpdateCenterX)(Shape *, int);
 typedef void (*fptrUpdateCenterY)(Shape *, int);
 typedef ShapeType (*fptrGetType)();
+typedef void (*fptrShapeUpdate)(Shape *, double, double, double, double);
 struct _Shape
 {
 	void *pDerivedObj;
@@ -32,6 +33,7 @@ struct _Shape
 	fptrUpdateCenterX update_center_x;
 	fptrUpdateCenterY update_center_y;
 	fptrGetType getType;
+	fptrShapeUpdate update;
 };
 Shape *New_Shape();
 

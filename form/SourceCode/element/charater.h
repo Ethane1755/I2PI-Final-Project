@@ -1,5 +1,5 @@
-#ifndef CHARATER_H_INCLUDED
-#define CHARATER_H_INCLUDED
+#ifndef CHARACTER_H_INCLUDED
+#define CHARACTER_H_INCLUDED
 #include <allegro5/allegro_audio.h>
 #include "element.h"
 #include "../shapes/Shape.h"

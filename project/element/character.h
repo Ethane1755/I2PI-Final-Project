@@ -11,9 +11,8 @@
 */
 typedef enum CharacterType
 {
-    STOP = 0,
-    MOVE,
-    ATK
+    IDLE = 0,
+    MOVE
 } CharacterType;
 typedef struct _Character
 {
@@ -27,6 +26,7 @@ typedef struct _Character
     int anime_time; // indicate how long the animation
     bool new_proj;
     Shape *hitbox; // the hitbox of object
+    int hp;        // 玩家血量
 } Character;
 Elements *New_Character(int label);
 void Character_update(Elements *self);
@@ -34,5 +34,6 @@ void Character_interact(Elements *self);
 void Character_draw(Elements *self);
 void Character_destory(Elements *self);
 void _Character_update_position(Elements *self, int dx, int dy);
+void Character_take_damage(Elements *self, int damage);
 
 #endif
