@@ -144,7 +144,7 @@ void Character_draw(Elements *self)
     ALLEGRO_BITMAP *frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     if (frame)
     {
-        al_draw_bitmap(frame, chara->x, chara->y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
+        al_draw_bitmap(frame, chara->x, chara->y - chara -> height / 2 + 23, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
     // idle動畫到特定幀時播放攻擊音效
     if (chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound)

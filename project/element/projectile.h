@@ -12,6 +12,7 @@ typedef struct _Projectile
     int v;             // the velocity of projectile
     ALLEGRO_BITMAP *img;
     Shape *hitbox; // the hitbox of object
+    float angle;
 } Projectile;
 Elements *New_Projectile(int label, int x, int y, int v);
 void Projectile_update(Elements *self);
