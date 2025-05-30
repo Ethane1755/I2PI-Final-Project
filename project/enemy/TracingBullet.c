@@ -16,12 +16,15 @@ Elements *New_TracingBullet(int label, float x, float y, float vx, float vy) {
     bullet->img = al_load_bitmap("assets/image/Tracing-Bullet.png");
     if (bullet->img) {
         bullet->total_frames = 8;
-        bullet->width = al_get_bitmap_width(bullet->img) / 4; 
-        bullet->height = al_get_bitmap_height(bullet->img) / 2; 
+        int original_width = al_get_bitmap_width(bullet->img) / 4; 
+        int original_height = al_get_bitmap_height(bullet->img) / 2; 
+        float scale = 2.0f;  // 可以調整這個數值來改變大小
+        bullet->width = original_width * scale;
+        bullet->height = original_height * scale;
     } else {
         printf("Warning: Could not load Tracing-Bullet.png\n");
-        bullet->width = 16;
-        bullet->height = 16;
+        bullet->width = 32;
+        bullet->height = 32;
         bullet->total_frames = 1;
     }
     
@@ -31,7 +34,7 @@ Elements *New_TracingBullet(int label, float x, float y, float vx, float vy) {
     bullet->vy = vy;
 
     bullet->trace_start_time = al_get_time();
-    bullet->trace_duration = 2.5; // 追蹤時間在這裡調整!!
+    bullet->trace_duration = 1.5; // 追蹤時間在這裡調整!!
     bullet->trace_strength = 0.8; // 追蹤強度
     bullet->is_tracing = true;
     
@@ -145,7 +148,7 @@ void _TracingBullet_interact_Character(Elements *self, Elements *tar) {
     Character *character = (Character *)(tar->pDerivedObj);
     
     if (character->hitbox->overlap(character->hitbox, bullet->hitbox)) {
-        character->hp -= 3; // 追蹤子彈傷害較高
+        character->hp -= 3; // 子彈傷害在這裡調整!!
         printf("Player hit by tracing bullet! HP: %d\n", character->hp);
         self->dele = true; 
     }
@@ -177,17 +180,21 @@ void TracingBullet_draw(Elements *self) {
         int frame_x = bullet->frame % 4; 
         int frame_y = bullet->frame / 4; 
         
-        int src_x = frame_x * bullet->width;
-        int src_y = frame_y * bullet->height;
-
-        int flags = (bullet->vx > 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
+        int original_width = al_get_bitmap_width(bullet->img) / 4;
+        int original_height = al_get_bitmap_height(bullet->img) / 2;
         
-        al_draw_bitmap_region(bullet->img, 
+        int src_x = frame_x * original_width;
+        int src_y = frame_y * original_height;
+
+        int flags = (bullet->vx < 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
+        
+        al_draw_scaled_bitmap(bullet->img, 
                              src_x, src_y, 
-                             bullet->width, bullet->height,
-                             bullet->x, bullet->y, 
+                             original_width, original_height,  
+                             bullet->x, bullet->y,             
+                             bullet->width, bullet->height,    
                              flags);
-    } 
+    }
     else {
         ALLEGRO_COLOR color = bullet->is_tracing ? 
             al_map_rgb(255, 255, 0) : al_map_rgb(255, 100, 100);
