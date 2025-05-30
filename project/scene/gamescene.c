@@ -22,9 +22,9 @@ Scene *New_GameScene(int label)
     pDerivedObj->background = al_load_bitmap("assets/image/stage.jpg");
     pObj->pDerivedObj = pDerivedObj;
     // register element
-    _Register_elements(pObj, New_Floor(Floor_L));
+    //_Register_elements(pObj, New_Floor(Floor_L));
     _Register_elements(pObj, New_Teleport(Teleport_L));
-    _Register_elements(pObj, New_Tree(Tree_L));
+    //_Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
     //_Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
