@@ -6,7 +6,9 @@
 /*
    [floor function]
 */
-Elements *New_Floor(int label)
+
+/*
+Elements* New_Floor(int label)
 {
     Floor *pDerivedObj = (Floor *)malloc(sizeof(Floor));
     Elements *pObj = New_Elements(label);
@@ -84,3 +86,4 @@ void Floor_destory(Elements *self)
     free(Obj);
     free(self);
 }
+*/

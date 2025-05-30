@@ -3,7 +3,9 @@
 /*
    [tree function]
 */
-Elements *New_Tree(int label)
+
+/*
+Elements* New_Tree(int label)
 {
     Tree *pDerivedObj = (Tree *)malloc(sizeof(Tree));
     Elements *pObj = New_Elements(label);
@@ -25,7 +27,8 @@ Elements *New_Tree(int label)
     pObj->Destroy = Tree_destory;
     return pObj;
 }
-void Tree_update(Elements *self) {}
+
+void Tree_update(Elements* self) {}
 void Tree_interact(Elements *self) {}
 void Tree_draw(Elements *self)
 {
@@ -40,3 +43,4 @@ void Tree_destory(Elements *self)
     free(Obj);
     free(self);
 }
+*/

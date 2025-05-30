@@ -19,7 +19,7 @@ Elements *New_Ball(int label)
                                      pDerivedObj->r);
     // setting the interact object
     pObj->inter_obj[pObj->inter_len++] = Character_L;
-    pObj->inter_obj[pObj->inter_len++] = Tree_L;
+    //pObj->inter_obj[pObj->inter_len++] = Tree_L;
 
     // setting derived object function
     pObj->pDerivedObj = pDerivedObj;
@@ -43,17 +43,17 @@ void Ball_interact(Elements *self)
     Ball *Obj = ((Ball *)(self->pDerivedObj));
     ElementVec labelEle = _Get_label_elements(scene, Character_L);
     Character *Obj1 = (Character *)(labelEle.arr[0]->pDerivedObj);
-    labelEle = _Get_label_elements(scene, Tree_L);
-    Tree *Obj2 = (Tree *)(labelEle.arr[0]->pDerivedObj);
+    /*labelEle = _Get_label_elements(scene, Tree_L);
+    Tree *Obj2 = (Tree *)(labelEle.arr[0]->pDerivedObj);*/
 
     if (Obj->hitbox->overlap(Obj->hitbox, Obj1->hitbox))
     {
         Obj->color = al_map_rgb(0, 255, 0);
     }
-    else if (Obj->hitbox->overlap(Obj->hitbox, Obj2->hitbox))
+    /*else if (Obj->hitbox->overlap(Obj->hitbox, Obj2->hitbox))
     {
         Obj->color = al_map_rgb(0, 0, 255);
-    }
+    }*/
     else
     {
         Obj->color = al_map_rgb(255, 0, 0);
