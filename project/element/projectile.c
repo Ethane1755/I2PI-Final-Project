@@ -3,6 +3,8 @@
 #include "../shapes/Circle.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
+#include <math.h> // 追蹤敵人需要
+
 /*
    [Projectile function]
 */
@@ -32,11 +34,44 @@ Elements *New_Projectile(int label, int x, int y, int v)
 
     return pObj;
 }
+
 void Projectile_update(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
+    ElementVec enemies = _Get_label_elements(scene, BasicEnemy_L); // 你的 enemy label
+    float tx = -1, ty = -1, min_dist = 1e9;
+    for (int i = 0; i < enemies.len; i++) {
+        Elements *e = enemies.arr[i];
+        void *enemyObj = e->pDerivedObj;
+        float ex = 0, ey = 0;
+        ex = *((float *)enemyObj); 
+        ey = *((float *)enemyObj + 1); 
+        float dx = ex - Obj->x;
+        float dy = ey - Obj->y;
+        float dist = sqrt(dx*dx + dy*dy);
+        if (dist < min_dist) {
+            min_dist = dist;
+            tx = ex;
+            ty = ey;
+        }
+    }
+    if (min_dist < 1e9) {
+        float dx = tx - Obj->x;
+        float dy = ty - Obj->y;
+        float len = sqrt(dx*dx + dy*dy);
+        if (len > 0) {
+            float speed = fabs(Obj->v);
+            dx = dx / len * speed;
+            dy = dy / len * speed;
+            Obj->angle = atan2(dy, dx);
+            _Projectile_update_position(self, dx, dy);
+            return;
+        }
+    }
+    Obj->angle = 0;
     _Projectile_update_position(self, Obj->v, 0);
 }
+
 void _Projectile_update_position(Elements *self, int dx, int dy)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
@@ -46,6 +81,7 @@ void _Projectile_update_position(Elements *self, int dx, int dy)
     hitbox->update_center_x(hitbox, dx);
     hitbox->update_center_y(hitbox, dy);
 }
+
 void Projectile_interact(Elements *self)
 {
     for (int j = 0; j < self->inter_len; j++)
@@ -65,6 +101,7 @@ void Projectile_interact(Elements *self)
         }
     }
 }
+
 void _Projectile_interact_Floor(Elements *self, Elements *tar)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
@@ -73,6 +110,7 @@ void _Projectile_interact_Floor(Elements *self, Elements *tar)
     else if (Obj->x > WIDTH + Obj->width)
         self->dele = true;
 }
+
 void _Projectile_interact_Tree(Elements *self, Elements *tar)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
@@ -82,14 +120,21 @@ void _Projectile_interact_Tree(Elements *self, Elements *tar)
         self->dele = true;
     }
 }
+
 void Projectile_draw(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    if (Obj->v > 0)
-        al_draw_bitmap(Obj->img, Obj->x, Obj->y, ALLEGRO_FLIP_HORIZONTAL);
-    else
-        al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    float cx = Obj->width / 2.0;
+    float cy = Obj->height / 2.0;
+    al_draw_rotated_bitmap(
+        Obj->img,
+        cx, cy, 
+        Obj->x + cx, Obj->y + cy, 
+        Obj->angle, 
+        0 
+    );
 }
+
 void Projectile_destory(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
