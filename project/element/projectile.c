@@ -63,7 +63,7 @@ void Projectile_update(Elements *self)
         float dy = ty - py;
         float len = sqrt(dx*dx + dy*dy);
         if (len > 0) {
-            float speed = fabs(Obj->v);
+            float speed = abs(Obj->v);
             dx = dx / len * speed;
             dy = dy / len * speed;
             Obj->angle = atan2(dy, dx);
