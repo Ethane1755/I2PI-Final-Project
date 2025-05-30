@@ -11,8 +11,9 @@
 */
 typedef enum CharacterType
 {
-    IDLE = 0,
-    MOVE
+    IDLE = 0, IDLED,
+    UP, DOWN, LEFT, RIGHT,
+    DIE
 } CharacterType;
 typedef struct _Character
 {
@@ -20,13 +21,14 @@ typedef struct _Character
     int width, height;              // the width and height of image
     bool dir;                       // true: face to right, false: face to left
     int state;                      // the state of character
-    ALGIF_ANIMATION *gif_status[3]; // gif for each state. 0: stop, 1: move, 2:attack
+    ALGIF_ANIMATION *gif_status[7]; // gif for each state. 0: stop, 1: move, 2:attack
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime;      // counting the time of animation
     int anime_time; // indicate how long the animation
     bool new_proj;
     Shape *hitbox; // the hitbox of object
     int hp;        // 玩家血量
+    int last_move_dir;
 } Character;
 Elements *New_Character(int label);
 void Character_update(Elements *self);
