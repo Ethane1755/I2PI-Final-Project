@@ -16,12 +16,18 @@ Elements *New_TracingBullet(int label, float x, float y, float vx, float vy) {
     bullet->img = al_load_bitmap("assets/image/Tracing-Bullet.png");
     if (bullet->img) {
         bullet->total_frames = 8;
-        bullet->width = al_get_bitmap_width(bullet->img) / 4; 
-        bullet->height = al_get_bitmap_height(bullet->img) / 2; 
+        // 原本的尺寸計算
+        int original_width = al_get_bitmap_width(bullet->img) / 4; 
+        int original_height = al_get_bitmap_height(bullet->img) / 2;
+   
+        float scale = 2.0f;  
+        bullet->width = original_width * scale;
+        bullet->height = original_height * scale;
     } else {
         printf("Warning: Could not load Tracing-Bullet.png\n");
-        bullet->width = 16;
-        bullet->height = 16;
+
+        bullet->width = 32 * 1.5f; 
+        bullet->height = 32 * 1.5f;
         bullet->total_frames = 1;
     }
     
@@ -176,16 +182,20 @@ void TracingBullet_draw(Elements *self) {
     if (bullet->img) {
         int frame_x = bullet->frame % 4; 
         int frame_y = bullet->frame / 4; 
+
+        int original_width = al_get_bitmap_width(bullet->img) / 4;
+        int original_height = al_get_bitmap_height(bullet->img) / 2;
         
-        int src_x = frame_x * bullet->width;
-        int src_y = frame_y * bullet->height;
+        int src_x = frame_x * original_width;
+        int src_y = frame_y * original_height;
 
         int flags = (bullet->vx > 0) ? ALLEGRO_FLIP_HORIZONTAL : 0;
-        
-        al_draw_bitmap_region(bullet->img, 
+  
+        al_draw_scaled_bitmap(bullet->img, 
                              src_x, src_y, 
-                             bullet->width, bullet->height,
-                             bullet->x, bullet->y, 
+                             original_width, original_height,  
+                             bullet->x, bullet->y,            
+                             bullet->width, bullet->height,    
                              flags);
     } 
     else {
