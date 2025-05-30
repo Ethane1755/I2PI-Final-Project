@@ -35,6 +35,7 @@ Elements *New_Projectile(int label, int x, int y, int v)
 
     return pObj;
 }
+
 void Projectile_update(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
@@ -70,9 +71,13 @@ void Projectile_update(Elements *self)
             _Projectile_update_position(self, dx, dy);
             return;
         }
+        else {
+            Obj->angle = -ALLEGRO_PI / 2; // 預設向上
+            _Projectile_update_position(self, 0, -Obj->v);
+        }
     }
-    Obj->angle = 0;
-    _Projectile_update_position(self, Obj->v, 0);
+    Obj->angle = -ALLEGRO_PI / 2;
+    _Projectile_update_position(self, 0, -Obj->v);
 }
 
 void _Projectile_update_position(Elements *self, int dx, int dy)

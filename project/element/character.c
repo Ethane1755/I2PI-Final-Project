@@ -11,19 +11,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-/*
-   [Character function]
-   合併 stop 和 atk 為 idle 狀態
-   狀態只剩 idle, move
-*/
-
 Elements *New_Character(int label)
 {
     Character *pDerivedObj = (Character *)malloc(sizeof(Character));
     Elements *pObj = New_Elements(label);
     // load character images
-    char state_string[2][10] = {"idle", "move"};
-    for (int i = 0; i < 2; i++)
+    char state_string[7][10] = {"idle", "idled",
+                                "up", "down", "left", "right", 
+                                "die"};
+    for (int i = 0; i < 7; i++)
     {
         char buffer[50];
         sprintf(buffer, "assets/image/chara_%s.gif", state_string[i]);
@@ -47,11 +43,12 @@ Elements *New_Character(int label)
     pDerivedObj->hitbox = New_Rectangle(
         pDerivedObj->x,
         pDerivedObj->y,
-        pDerivedObj->x + pDerivedObj->width,
-        pDerivedObj->y + pDerivedObj->height
+        pDerivedObj->x + pDerivedObj->width / 2,
+        pDerivedObj->y + pDerivedObj->height / 2
     );
     pDerivedObj->dir = false; // true: face to right, false: face to left
     pDerivedObj->state = IDLE;
+    pDerivedObj->last_move_dir = 0;
     pDerivedObj->new_proj = false;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
@@ -64,77 +61,79 @@ Elements *New_Character(int label)
 
 void Character_update(Elements *self) {
     Character *chara = ((Character *)(self->pDerivedObj));
-    // idle 狀態自動攻擊
-    if (chara->state == IDLE) {
-        // 有移動鍵就切換到 MOVE
-        if (key_state[ALLEGRO_KEY_W]) {
-            chara->dir = false;
-            chara->state = MOVE;
+    // 使用 last_move_dir 來記錄上一幀的上下移動
+    // 0: 無, 1: 上, 2: 下
+    // 優先判斷移動鍵
+    if (key_state[ALLEGRO_KEY_W]) {
+        chara->dir = false;
+        _Character_update_position(self, 0, -5);
+        chara->last_move_dir = 1; // 上
+        chara->state = UP;
+    }
+    else if (key_state[ALLEGRO_KEY_A]) {
+        chara->dir = false;
+        _Character_update_position(self, -5, 0);
+        chara->state = LEFT;
+    }
+    else if (key_state[ALLEGRO_KEY_S]) {
+        chara->dir = false;
+        _Character_update_position(self, 0, 5);
+        chara->last_move_dir = 2; // 下
+        chara->state = DOWN;
+    }
+    else if (key_state[ALLEGRO_KEY_D]) {
+        chara->dir = false;
+        _Character_update_position(self, 5, 0);
+        chara->state = RIGHT;
+    }
+    else {
+        // 根據上一個狀態決定 idle 顯示
+        if (chara->last_move_dir == 1) {
+            chara->state = IDLED; // 停止上移時顯示 idled
+        } else if (chara->last_move_dir == 2) {
+            chara->state = IDLE;  // 停止下移時顯示 idle
+        } else {
+            chara->state = IDLE;
         }
-        else if (key_state[ALLEGRO_KEY_A]) {
-            chara->dir = false;
-            chara->state = MOVE;
-        }
-        else if (key_state[ALLEGRO_KEY_S]) {
-            chara->dir = true;
-            chara->state = MOVE;
-        }
-        else if (key_state[ALLEGRO_KEY_D]) {
-            chara->dir = true;
-            chara->state = MOVE;
-        }
-        // idle動畫循環時自動攻擊
-        if (chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 7 && chara->new_proj == false) {
+    }
+
+    // idle動畫循環時自動攻擊
+    if (chara->state == IDLE || chara->state == IDLED) {
+        if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
+            (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
             Elements *pro;
-            if (chara->dir) {
-                pro = New_Projectile(Projectile_L,
-                                     chara->x - 50,
-                                     chara->y + 10,
-                                     -5);
+            int proj_x = chara->x + chara->width / 2;
+            int proj_y;
+            if (chara->state == IDLE) {
+                proj_y = chara->y;
             } else {
-                pro = New_Projectile(Projectile_L,
-                                     chara->x + chara->width - 100,
-                                     chara->y + 10,
-                                     5);
-                
+                proj_y = chara->y + 32;
             }
+            int proj_v = 0;
+            if (chara->state == IDLE)
+                proj_v = 5; // 向上
+            else if (chara->state == IDLED)
+                proj_v = -5;  // 向下
+
+            pro = New_Projectile(Projectile_L, proj_x, proj_y, proj_v);
             _Register_elements(scene, pro);
             chara->new_proj = true;
         }
-        if (chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) {
+        if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
+            (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
             chara->new_proj = false;
         }
     }
-    else if (chara->state == MOVE) {
-        if (key_state[ALLEGRO_KEY_W]) {
-            chara->dir = false;
-            _Character_update_position(self, 0, -5);
-            chara->state = MOVE;
-        }
-        else if (key_state[ALLEGRO_KEY_A]) {
-            chara->dir = true;
-            _Character_update_position(self, -5, 0);
-            chara->state = MOVE;
-        }
-        else if (key_state[ALLEGRO_KEY_S]) {
-            chara->dir = false;
-            _Character_update_position(self, 0, 5);
-            chara->state = MOVE;
-        }
-        else if (key_state[ALLEGRO_KEY_D]) {
-            chara->dir = false;
-            _Character_update_position(self, 5, 0);
-            chara->state = MOVE;
-        }
-        // 沒有移動鍵就回到 IDLE
-        else {
-            chara->state = IDLE;
-        }
-        if (chara->gif_status[MOVE] && chara->gif_status[MOVE]->done)
-            chara->state = IDLE;
+/*
+    // 動畫結束自動回到IDLE
+    if (chara->gif_status[chara->state] && chara->gif_status[chara->state]->done) {
+        chara->state = IDLE;
     }
+*/
     if (chara->hp <= 0) {
-        self->dele = true; 
+        chara->state = DIE;
+        if (chara->gif_status[DIE] && chara->gif_status[DIE]->done)
+            self->dele = true;    
     }
 }
 
@@ -147,7 +146,8 @@ void Character_draw(Elements *self)
         al_draw_bitmap(frame, chara->x, chara->y - chara -> height / 2 + 23, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
     // idle動畫到特定幀時播放攻擊音效
-    if (chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound)
+    if ((chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound) ||
+        (chara->state == IDLED && chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 2 && chara->atk_Sound))
     {
         al_play_sample_instance(chara->atk_Sound);
     }
@@ -158,7 +158,7 @@ void Character_destory(Elements *self)
     Character *Obj = ((Character *)(self->pDerivedObj));
     if (Obj->atk_Sound)
         al_destroy_sample_instance(Obj->atk_Sound);
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 7; i++)
         if (Obj->gif_status[i])
             algif_destroy_animation(Obj->gif_status[i]);
     if (Obj->hitbox)
