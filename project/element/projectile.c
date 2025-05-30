@@ -3,6 +3,7 @@
 #include "../shapes/Circle.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
+#include "../enemy/BasicEnemy.h"
 #include <math.h> // 追蹤敵人需要
 
 /*
@@ -34,20 +35,20 @@ Elements *New_Projectile(int label, int x, int y, int v)
 
     return pObj;
 }
-
 void Projectile_update(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    ElementVec enemies = _Get_label_elements(scene, BasicEnemy_L); // 你的 enemy label
+    ElementVec enemies = _Get_label_elements(scene, BasicEnemy_L);
     float tx = -1, ty = -1, min_dist = 1e9;
     for (int i = 0; i < enemies.len; i++) {
         Elements *e = enemies.arr[i];
-        void *enemyObj = e->pDerivedObj;
-        float ex = 0, ey = 0;
-        ex = *((float *)enemyObj); 
-        ey = *((float *)enemyObj + 1); 
-        float dx = ex - Obj->x;
-        float dy = ey - Obj->y;
+        BasicEnemy *enemyObj = (BasicEnemy *)(e->pDerivedObj);
+        float ex = enemyObj->x + enemyObj->width / 2.0f;
+        float ey = enemyObj->y + enemyObj->height / 3.0f * 2.0f;
+        float px = Obj->x + Obj->width / 2.0f;
+        float py = Obj->y + Obj->height / 2.0f;
+        float dx = ex - px;
+        float dy = ey - py;
         float dist = sqrt(dx*dx + dy*dy);
         if (dist < min_dist) {
             min_dist = dist;
@@ -56,8 +57,10 @@ void Projectile_update(Elements *self)
         }
     }
     if (min_dist < 1e9) {
-        float dx = tx - Obj->x;
-        float dy = ty - Obj->y;
+        float px = Obj->x + Obj->width / 2.0f;
+        float py = Obj->y + Obj->height / 2.0f;
+        float dx = tx - px;
+        float dy = ty - py;
         float len = sqrt(dx*dx + dy*dy);
         if (len > 0) {
             float speed = fabs(Obj->v);
@@ -126,12 +129,16 @@ void Projectile_draw(Elements *self)
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
     float cx = Obj->width / 2.0;
     float cy = Obj->height / 2.0;
+    int flip_flag = 0;
+    if (Obj->v < 0) {
+        flip_flag = ALLEGRO_FLIP_HORIZONTAL;
+    }
     al_draw_rotated_bitmap(
         Obj->img,
         cx, cy, 
         Obj->x + cx, Obj->y + cy, 
         Obj->angle, 
-        0 
+        flip_flag 
     );
 }
 
