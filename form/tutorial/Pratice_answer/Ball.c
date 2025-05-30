@@ -1,7 +1,7 @@
 #include "Ball.h"
 #include "../global.h"
 #include "../shapes/Circle.h"
-#include "charater.h"
+#include "character.h"
 #include "tree.h"
 #include "../scene/sceneManager.h" // for scene variable
 #include "../scene/gamescene.h"    // for element label

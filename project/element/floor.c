@@ -1,5 +1,5 @@
 #include "floor.h"
-#include "charater.h"
+#include "character.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
 #include <stdio.h>

@@ -484,7 +484,7 @@ commands in a row can cause the buffer to fill up.  Then any additional
 output that cannot be processed immediately will be lost.
 
    To avoid this problem, we normally follow each display command with
-enough useless charaters (usually null characters) to fill up the time
+enough useless characters (usually null characters) to fill up the time
 that the display command needs to execute.  This does the job if the
 terminal throws away null characters without using up space in the
 buffer (which most terminals do).  If enough padding is used, no output

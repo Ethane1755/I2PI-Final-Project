@@ -1,12 +1,13 @@
 #include <allegro5/allegro_audio.h>
 #include "gamescene.h"
 #include "../element/element.h"
-#include "../element/charater.h"
+#include "../element/character.h"
 #include "../element/floor.h"
 #include "../element/teleport.h"
 #include "../element/tree.h"
 #include "../element/projectile.h"
 #include "../element/ball.h"
+#include "../enemy/BasicEnemy.h"
 /*
    [GameScene function]
 */
@@ -23,6 +24,7 @@ Scene *New_GameScene(int label)
     _Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
+    _Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
     // setting derived object function
     pObj->Update = game_scene_update;
     pObj->Draw = game_scene_draw;

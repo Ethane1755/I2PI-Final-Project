@@ -19,10 +19,12 @@ Shape *New_Rectangle(double x1, double y1, double x2, double y2)
 	pObj->center_y = Rectangle_center_y;
 	pObj->update_center_x = Rectangle_update_center_x;
 	pObj->update_center_y = Rectangle_update_center_y;
+	pObj->update = Rectangle_update;
 	pObj->getType = Rectangle_getType;
 	pObj->pDerivedObj = pDerivedObj;
 	return pObj;
 }
+
 double Rectangle_center_x(Shape *self)
 {
 	return (Rectangle_Self(self)->x1 + Rectangle_Self(self)->x2) / 2;
@@ -40,6 +42,13 @@ void Rectangle_update_center_y(Shape *self, int y)
 {
 	Rectangle_Self(self)->y1 += y;
 	Rectangle_Self(self)->y2 += y;
+}
+void Rectangle_update(Shape *self, double x1, double y1, double x2, double y2)
+{
+	Rectangle_Self(self)->x1 = x1;
+	Rectangle_Self(self)->y1 = y1;
+	Rectangle_Self(self)->x2 = x2;
+	Rectangle_Self(self)->y2 = y2;
 }
 ShapeType Rectangle_getType()
 {

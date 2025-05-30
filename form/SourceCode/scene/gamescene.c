@@ -1,7 +1,7 @@
 #include <allegro5/allegro_audio.h>
 #include "gamescene.h"
 #include "../element/element.h"
-#include "../element/charater.h"
+#include "../element/character.h"
 #include "../element/floor.h"
 #include "../element/teleport.h"
 #include "../element/tree.h"
