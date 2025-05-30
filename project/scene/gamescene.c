@@ -28,10 +28,10 @@ Scene *New_GameScene(int label)
     //_Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
-    _Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
-    _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
+    //_Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
+    //_Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
     //_Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
-    //_Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
+    _Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
     // setting derived object function
     pObj->Update = game_scene_update;
     pObj->Draw = game_scene_draw;
