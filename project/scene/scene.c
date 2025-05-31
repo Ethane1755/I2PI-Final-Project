@@ -3,7 +3,8 @@
 /*
    [Scene function]
 */
-void _Remove_elements(Scene *scene, Elements *ele)
+
+void _Remove_elements(Scene* scene, Elements* ele)
 {
     EPNode *ptr = scene->ele_list[ele->label];
     EPNode *parent_ptr = NULL;

@@ -15,19 +15,21 @@
 /*
    [GameScene function]
 */
-Scene *New_GameScene(int label)
+// Character character; //character
+
+Scene* New_GameScene(int label)
 {
-    GameScene *pDerivedObj = (GameScene *)malloc(sizeof(GameScene));
-    Scene *pObj = New_Scene(label);
+    GameScene* pDerivedObj = (GameScene*)malloc(sizeof(GameScene));
+    Scene* pObj = New_Scene(label);
     // setting derived object member
-    pDerivedObj->background = al_load_bitmap("assets/image/stage.jpg");
+    pDerivedObj->background = al_load_bitmap("assets/image/gamemap1.png");
     pObj->pDerivedObj = pDerivedObj;
     // register element
     //_Register_elements(pObj, New_Floor(Floor_L));
     _Register_elements(pObj, New_Teleport(Teleport_L));
     //_Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Character(Character_L));
-    _Register_elements(pObj, New_Ball(Ball_L));
+    //_Register_elements(pObj, New_Ball(Ball_L));
     //_Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
     //_Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
     //_Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
@@ -38,50 +40,104 @@ Scene *New_GameScene(int label)
     pObj->Destroy = game_scene_destroy;
     return pObj;
 }
-void game_scene_update(Scene *self)
-{
-    // update every element
+void game_scene_update(Scene* self)
+{    
+        // update every element
     ElementVec allEle = _Get_all_elements(self);
     for (int i = 0; i < allEle.len; i++)
     {
-        Elements *ele = allEle.arr[i];
+        Elements* ele = allEle.arr[i];
         ele->Update(ele);
     }
     // run interact for every element
     for (int i = 0; i < allEle.len; i++)
     {
-        Elements *ele = allEle.arr[i];
+        Elements* ele = allEle.arr[i];
         ele->Interact(ele);
     }
     // remove element
     for (int i = 0; i < allEle.len; i++)
     {
-        Elements *ele = allEle.arr[i];
+        Elements* ele = allEle.arr[i];
         if (ele->dele)
             _Remove_elements(self, ele);
     }
+
+
+    // Point Camera;
+    // Camera = (Point){ WIDTH/2,HEIGHT/2 };
+    // Camera.x = WIDTH / 2;
+    // Camera.y = character.y - HEIGHT / 2;
+
+
 }
-void game_scene_draw(Scene *self)
+
+void game_scene_draw(Scene* self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
-    GameScene *gs = ((GameScene *)(self->pDerivedObj));
-    al_draw_bitmap(gs->background, 0, 0, 0);
+    GameScene* gs = ((GameScene*)(self->pDerivedObj));
+
+    // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
+    int chara_x = 0, chara_y = 0;
+    for (int i = 0; i < allEle.len; i++) {
+        Elements* ele = allEle.arr[i];
+        if (ele->label == Character_L) {
+            Character* chara = (Character*)(ele->pDerivedObj);
+            chara_x = chara->x;
+            chara_y = chara->y;
+            break;
+        }
+    }
+
+    printf("Character position: (%d, %d)\n", chara_x, chara_y);
+
+    // 計算 Camera
+    Point Camera;
+    Camera.x = 0; // x 固定不動
+    Camera.y = chara_y-32;
+
+    // 限制 Camera.y 不超過地圖上下邊界
+    if (Camera.y < 0)
+        Camera.y = 0;
+    int map_height = al_get_bitmap_height(gs->background);
+    //printf("map height=%d\n", map_height);
+    if (Camera.y > map_height - HEIGHT-32)
+        Camera.y = map_height - HEIGHT-32;
+
+    printf("Camera.y=%lf\n", Camera.y);
+    // 背景根據 Camera 偏移
+    al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
+
     for (int i = 0; i < allEle.len; i++)
     {
-        Elements *ele = allEle.arr[i];
-        ele->Draw(ele);
+        Elements* ele = allEle.arr[i];
+        ele->Draw(ele);            
     }
 }
-void game_scene_destroy(Scene *self)
+
+// void game_scene_draw(Scene* self)
+// {
+//     al_clear_to_color(al_map_rgb(0, 0, 0));
+//     GameScene *gs = ((GameScene *)(self->pDerivedObj));
+//     al_draw_bitmap(gs->background, 0, 0, 0);
+//     ElementVec allEle = _Get_all_elements(self);
+//     for (int i = 0; i < allEle.len; i++)
+//     {
+//         Elements *ele = allEle.arr[i];
+//         ele->Draw(ele);
+//     }
+// }
+
+void game_scene_destroy(Scene* self)
 {
-    GameScene *Obj = ((GameScene *)(self->pDerivedObj));
-    ALLEGRO_BITMAP *background = Obj->background;
+    GameScene* Obj = ((GameScene*)(self->pDerivedObj));
+    ALLEGRO_BITMAP* background = Obj->background;
     al_destroy_bitmap(background);
     ElementVec allEle = _Get_all_elements(self);
     for (int i = 0; i < allEle.len; i++)
     {
-        Elements *ele = allEle.arr[i];
+        Elements* ele = allEle.arr[i];
         ele->Destroy(ele);
     }
     free(Obj);

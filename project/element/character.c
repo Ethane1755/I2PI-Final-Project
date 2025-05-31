@@ -97,6 +97,9 @@ void Character_update(Elements *self) {
         }
     }
 
+    //printf("Character position: (%d, %d)\n", chara->x, chara->y);
+
+
     // idle動畫循環時自動攻擊
     if (chara->state == IDLE || chara->state == IDLED) {
         if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
@@ -170,13 +173,24 @@ void Character_destory(Elements *self)
 void _Character_update_position(Elements *self, int dx, int dy)
 {
     Character *chara = ((Character *)(self->pDerivedObj));
-    chara->x += dx;
-    chara->y += dy;
-    Shape *hitbox = chara->hitbox;
-    if (hitbox) {
-        hitbox->update_center_x(hitbox, dx);
-        hitbox->update_center_y(hitbox, dy);
-    }
+    // chara->x += dx;
+    // chara->y += dy;
+    // Shape *hitbox = chara->hitbox;
+    // if (hitbox) {
+    //     hitbox->update_center_x(hitbox, dx);
+    //     hitbox->update_center_y(hitbox, dy);
+    // }
+    int new_x = chara->x + dx;
+    int new_y = chara->y + dy;
+
+    // 限制角色活動範圍
+    if (new_x < 16) new_x = 16;
+    if (new_x > 768) new_x = 768;
+    if (new_y < 32) new_y = 32;
+    if (new_y > 976) new_y = 976;
+
+    chara->x = new_x;
+    chara->y = new_y;
 }
 
 void Character_interact(Elements *self) {
