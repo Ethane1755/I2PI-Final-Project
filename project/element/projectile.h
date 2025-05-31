@@ -19,7 +19,7 @@ void Projectile_update(Elements *self);
 void Projectile_interact(Elements *self);
 void Projectile_draw(Elements *self);
 void Projectile_destory(Elements *self);
-void _Projectile_update_position(Elements *self, int dx, int dy);
+void _Projectile_update_position(Elements *self, float dx, float dy);
 void _Projectile_interact_Floor(Elements *self, Elements *tar);
 void _Projectile_interact_Tree(Elements *self, Elements *tar);
 

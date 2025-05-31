@@ -9,6 +9,31 @@
 /*
    [Projectile function]
 */
+ElementVec _Get_all_enemies(Scene *scene) {
+    ElementVec allEnemies;
+    allEnemies.len = 0;
+
+    EleType enemyTypes[] = {BasicEnemy_L, BulletEnemy_L, TraceEnemy_L, BossEnemy_L};
+    int numEnemyTypes = sizeof(enemyTypes) / sizeof(EleType);
+    
+    for (int t = 0; t < numEnemyTypes; t++) {
+        ElementVec enemies = _Get_label_elements(scene, enemyTypes[t]);
+        for (int i = 0; i < enemies.len; i++) {
+            if (allEnemies.len < MAX_ELEMENT) {
+                allEnemies.arr[allEnemies.len++] = enemies.arr[i];
+            } 
+            else {
+                break;
+            }
+        }
+        if (allEnemies.len >= MAX_ELEMENT) {
+            break;
+        }
+    }
+    
+    return allEnemies;
+}
+
 Elements *New_Projectile(int label, int x, int y, int v)
 {
     Projectile *pDerivedObj = (Projectile *)malloc(sizeof(Projectile));
@@ -36,11 +61,22 @@ Elements *New_Projectile(int label, int x, int y, int v)
     return pObj;
 }
 
+void _Projectile_update_position(Elements *self, float dx, float dy) {
+    Projectile *Obj = (Projectile *)(self->pDerivedObj);
+    Obj->x += dx;
+    Obj->y += dy;
+    if (Obj->hitbox) {
+        Obj->hitbox->update_center_x(Obj->hitbox, dx);
+        Obj->hitbox->update_center_y(Obj->hitbox, dy);
+    }
+}
+
 void Projectile_update(Elements *self)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    ElementVec enemies = _Get_label_elements(scene, BasicEnemy_L);
+    ElementVec enemies = _Get_all_enemies(scene);
     float tx = -1, ty = -1, min_dist = 1e9;
+    
     for (int i = 0; i < enemies.len; i++) {
         Elements *e = enemies.arr[i];
         BasicEnemy *enemyObj = (BasicEnemy *)(e->pDerivedObj);
@@ -51,12 +87,14 @@ void Projectile_update(Elements *self)
         float dx = ex - px;
         float dy = ey - py;
         float dist = sqrt(dx*dx + dy*dy);
+        
         if (dist < min_dist) {
             min_dist = dist;
             tx = ex;
             ty = ey;
         }
     }
+    
     if (min_dist < 1e9) {
         float px = Obj->x + Obj->width / 2.0f;
         float py = Obj->y + Obj->height / 2.0f;
@@ -70,24 +108,13 @@ void Projectile_update(Elements *self)
             Obj->angle = atan2(dy, dx);
             _Projectile_update_position(self, dx, dy);
             return;
-        }
-        else {
+        } else {
             Obj->angle = -ALLEGRO_PI / 2; // 預設向上
             _Projectile_update_position(self, 0, -Obj->v);
         }
     }
     Obj->angle = -ALLEGRO_PI / 2;
     _Projectile_update_position(self, 0, -Obj->v);
-}
-
-void _Projectile_update_position(Elements *self, int dx, int dy)
-{
-    Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    Obj->x += dx;
-    Obj->y += dy;
-    Shape *hitbox = Obj->hitbox;
-    hitbox->update_center_x(hitbox, dx);
-    hitbox->update_center_y(hitbox, dy);
 }
 
 void Projectile_interact(Elements *self)
