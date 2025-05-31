@@ -39,7 +39,8 @@ Elements *New_Character(int label)
     pDerivedObj->width = pDerivedObj->gif_status[0]->width;
     pDerivedObj->height = pDerivedObj->gif_status[0]->height;
     pDerivedObj->x = 300;
-    pDerivedObj->y = HEIGHT - pDerivedObj->height - 60;
+    //pDerivedObj->y = HEIGHT - pDerivedObj->height - 60;
+    pDerivedObj->y = HEIGHT/2;
     pDerivedObj->hitbox = New_Rectangle(
         pDerivedObj->x,
         pDerivedObj->y,
@@ -172,7 +173,9 @@ void Character_destory(Elements *self)
 
 void _Character_update_position(Elements *self, int dx, int dy)
 {
-    Character *chara = ((Character *)(self->pDerivedObj));
+    Character* chara = ((Character*)(self->pDerivedObj));
+    // GameScene* gs = ((GameScene*)(self->pDerivedObj));
+    // int map_height = al_get_bitmap_height(gs->background);
     // chara->x += dx;
     // chara->y += dy;
     // Shape *hitbox = chara->hitbox;
@@ -184,11 +187,16 @@ void _Character_update_position(Elements *self, int dx, int dy)
     int new_y = chara->y + dy;
 
     // 限制角色活動範圍
-    if (new_x < 16) new_x = 16;
+    // 圖片高度為1024
+    if (new_x < -16) new_x = -16;
+    //if (new_x > WIDTH - chara->width) new_x = WIDTH - chara->width;
     if (new_x > 768) new_x = 768;
-    if (new_y < 32) new_y = 32;
-    if (new_y > 976) new_y = 976;
-
+    if (new_y < 16) new_y = 16;
+    if (new_y > HEIGHT) new_y = HEIGHT;
+    //if (new_y > HEIGHT - chara->height) new_y = HEIGHT - chara->height;
+    //if (new_y > HEIGHT+60 - chara->height) new_y = HEIGHT+60 - chara->height;
+    //if (new_y > map_height - chara->height) new_y = map_height - chara->height;
+    
     chara->x = new_x;
     chara->y = new_y;
 }

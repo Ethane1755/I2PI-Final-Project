@@ -8,7 +8,6 @@ typedef void (*fptrEleDraw)(Elements *);
 typedef void (*fptrEleUpdate)(Elements *);
 typedef void (*fptrEleInteract)(Elements *);
 typedef void (*fptrEleDestroy)(Elements*);
-typedef void (*fptrEleDrawWithCamera)(Elements*, Point);
 struct _Elements
 {
     int label; // the class of the element
@@ -22,7 +21,6 @@ struct _Elements
     fptrEleUpdate Update;
     fptrEleInteract Interact;
     fptrEleDestroy Destroy;
-    fptrEleDrawWithCamera DrawWithCamera;
 };
 Elements *New_Elements(int label);
 

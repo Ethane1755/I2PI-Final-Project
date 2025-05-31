@@ -22,7 +22,7 @@ Scene* New_GameScene(int label)
     GameScene* pDerivedObj = (GameScene*)malloc(sizeof(GameScene));
     Scene* pObj = New_Scene(label);
     // setting derived object member
-    pDerivedObj->background = al_load_bitmap("assets/image/gamemap1.png");
+    pDerivedObj->background = al_load_bitmap("assets/image/map1.png");
     pObj->pDerivedObj = pDerivedObj;
     // register element
     //_Register_elements(pObj, New_Floor(Floor_L));
@@ -90,22 +90,26 @@ void game_scene_draw(Scene* self)
         }
     }
 
-    //printf("Character position: (%d, %d)\n", chara_x, chara_y);
+    printf("Character position: (%d, %d)\n", chara_x, chara_y);
 
     // 計算 Camera
     Point Camera;
     Camera.x = 0; // x 固定不動
-    Camera.y = chara_y-32;
+    Camera.y = chara_y;
+    // if(chara_y<600)
+    //     Camera.y = chara_y;
+    // else
+    //     Camera.y = 1024;
 
     // 限制 Camera.y 不超過地圖上下邊界
     if (Camera.y < 0)
         Camera.y = 0;
     int map_height = al_get_bitmap_height(gs->background);
-    //printf("map height=%d\n", map_height);
-    if (Camera.y > map_height - HEIGHT-32)
-        Camera.y = map_height - HEIGHT-32;
+    if (Camera.y > HEIGHT)
+        Camera.y = HEIGHT;
 
-    //printf("Camera.y=%lf\n", Camera.y);
+  
+    printf("Camera.y=%lf\n", Camera.y);
     // 背景根據 Camera 偏移
     al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
 
