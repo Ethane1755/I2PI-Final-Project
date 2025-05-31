@@ -90,7 +90,7 @@ void game_scene_draw(Scene* self)
         }
     }
 
-    printf("Character position: (%d, %d)\n", chara_x, chara_y);
+    //printf("Character position: (%d, %d)\n", chara_x, chara_y);
 
     // 計算 Camera
     Point Camera;
@@ -105,7 +105,7 @@ void game_scene_draw(Scene* self)
     if (Camera.y > map_height - HEIGHT-32)
         Camera.y = map_height - HEIGHT-32;
 
-    printf("Camera.y=%lf\n", Camera.y);
+    //printf("Camera.y=%lf\n", Camera.y);
     // 背景根據 Camera 偏移
     al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
 
