@@ -179,9 +179,6 @@ void TracingBullet_draw(Elements *self) {
     if (bullet->img) {
         int frame_x = bullet->frame % 4; 
         int frame_y = bullet->frame / 4; 
-
-        int original_width = al_get_bitmap_width(bullet->img) / 4;
-        int original_height = al_get_bitmap_height(bullet->img) / 2;
         
         int original_width = al_get_bitmap_width(bullet->img) / 4;
         int original_height = al_get_bitmap_height(bullet->img) / 2;
