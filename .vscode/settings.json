@@ -4,6 +4,6 @@
         "projectile.h": "c",
         "charater.h": "c",
         "allegro_audio.h": "c",
-        "scenemanager.h": "c"
+        "scenemanager.h": "c"       
     }
 }

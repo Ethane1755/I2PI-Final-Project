@@ -7,7 +7,7 @@ typedef struct _Elements Elements;
 typedef void (*fptrEleDraw)(Elements *);
 typedef void (*fptrEleUpdate)(Elements *);
 typedef void (*fptrEleInteract)(Elements *);
-typedef void (*fptrEleDestroy)(Elements *);
+typedef void (*fptrEleDestroy)(Elements*);
 struct _Elements
 {
     int label; // the class of the element

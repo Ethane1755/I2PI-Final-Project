@@ -15,10 +15,15 @@
 #endif
 
 bool isPositionValid(float x, float y, int width, int height) {
-    if (x < 0 || y < 0 || x + width > 1440 || y + height > 900) {
+    // if (x < 0 || y < 0 || x + width > 1440 || y + height > 900) {
+    //     return false;
+    // }
+
+    //since HEIGHT=672 and WIDTH=900, reference in global.c
+    if (x < 0 || y < 0 || x + width > 900 || y + height > 672) {
         return false;
     }
-    
+
     return true;
 }
 
