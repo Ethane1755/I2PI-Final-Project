@@ -3,6 +3,7 @@
 #include <allegro5/allegro_image.h>
 #include "character.h"
 #include "projectile.h"
+#include "weapon.h"
 #include "../scene/sceneManager.h"
 #include "../shapes/Rectangle.h"
 #include "../algif5/algif.h"
@@ -99,28 +100,11 @@ void Character_update(Elements *self) {
     }
 
     //printf("Character position: (%d, %d)\n", chara->x, chara->y);
-
-
     // idle動畫循環時自動攻擊
     if (chara->state == IDLE || chara->state == IDLED) {
         if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
             (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
-            Elements *pro;
-            int proj_x = chara->x + chara->width / 2;
-            int proj_y;
-            if (chara->state == IDLE) {
-                proj_y = chara->y;
-            } else {
-                proj_y = chara->y + 32;
-            }
-            int proj_v = 0;
-            if (chara->state == IDLE)
-                proj_v = 5; // 向上
-            else if (chara->state == IDLED)
-                proj_v = -5;  // 向下
-
-            pro = New_Projectile(Projectile_L, proj_x, proj_y, proj_v);
-            _Register_elements(scene, pro);
+            Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
             chara->new_proj = true;
         }
         if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
@@ -145,10 +129,27 @@ void Character_draw(Elements *self)
 {
     Character *chara = ((Character *)(self->pDerivedObj));
     ALLEGRO_BITMAP *frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
-    if (frame)
-    {
-        al_draw_bitmap(frame, chara->x, chara->y - chara -> height / 2 + 23, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
+    int draw_x = chara->x + 20;
+    int draw_y = chara->y - chara->height / 2 - 10;
+    int weapon_x = chara->x + chara->width / 2 - 30;
+    int weapon_y = chara->y - chara -> height / 3 + 10;
+
+    if (chara->state == IDLE && chara->last_proj) {
+        // idle 狀態：武器在角色後面
+        Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
+        if (frame)
+            al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
+    } else if (chara->state == IDLED && chara->last_proj) {
+        // idled 狀態：武器在角色前面
+        if (frame)
+            al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
+        Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
+    } else {
+        // 其他狀態只畫角色
+        if (frame)
+            al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
+
     // idle動畫到特定幀時播放攻擊音效
     if ((chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound) ||
         (chara->state == IDLED && chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 2 && chara->atk_Sound))
