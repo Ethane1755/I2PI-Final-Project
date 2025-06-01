@@ -41,8 +41,8 @@ Scene* New_GameScene(int label)
     return pObj;
 }
 void game_scene_update(Scene* self)
-{    
-        // update every element
+{
+    // update every element
     ElementVec allEle = _Get_all_elements(self);
     for (int i = 0; i < allEle.len; i++)
     {
@@ -90,24 +90,33 @@ void game_scene_draw(Scene* self)
     Point Camera;
     Camera.x = 0; // x 固定不動
     Camera.y = chara_y;
-    // if(chara_y<600)
-    //     Camera.y = chara_y;
-    // else
-    //     Camera.y = 1024;
 
-    // 限制 Camera.y 不超過地圖上下邊界
     if (Camera.y < 0)
         Camera.y = 0;
     if (Camera.y > HEIGHT)
         Camera.y = HEIGHT;
     //printf("Camera.y=%lf\n", Camera.y);
     // 背景根據 Camera 偏移
+    // if (chara_y < 200)
+    //     Camera.y = 0;
+    // else if (chara_y < 400)
+    //     Camera.y = 250;
+    // else
+    //     Camera.y = 500;
+
+    // // 限制 Camera.y 不超過地圖邊界（可選）
+    // int map_height = al_get_bitmap_height(gs->background);
+    // if (Camera.y < 0)
+    //     Camera.y = 0;
+    // if (Camera.y > map_height - HEIGHT)
+    //     Camera.y = map_height - HEIGHT;
+
     al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
 
     for (int i = 0; i < allEle.len; i++)
     {
         Elements* ele = allEle.arr[i];
-        ele->Draw(ele);            
+        ele->Draw(ele);
     }
 }
 
