@@ -9,17 +9,45 @@
 #include "../algif5/algif.h"
 #include "../scene/gamescene.h"
 #include "../enemy/BasicEnemy.h"
+#include "../enemy/BossEnemy.h"
+#include "../enemy/BulletEnemy.h"
+#include "../enemy/TraceEnemy.h"
 #include <stdio.h>
 #include <stdbool.h>
 
-Elements *New_Character(int label)
+ElementVec _Get_all_the_enemies(Scene* scene) {
+    ElementVec allEnemies;
+    allEnemies.len = 0;
+
+    EleType enemyTypes[] = { BasicEnemy_L, BulletEnemy_L, TraceEnemy_L, BossEnemy_L };
+    int numEnemyTypes = sizeof(enemyTypes) / sizeof(EleType);
+
+    for (int t = 0; t < numEnemyTypes; t++) {
+        ElementVec enemies = _Get_label_elements(scene, enemyTypes[t]);
+        for (int i = 0; i < enemies.len; i++) {
+            if (allEnemies.len < MAX_ELEMENT) {
+                allEnemies.arr[allEnemies.len++] = enemies.arr[i];
+            }
+            else {
+                break;
+            }
+        }
+        if (allEnemies.len >= MAX_ELEMENT) {
+            break;
+        }
+    }
+
+    return allEnemies;
+}
+
+Elements* New_Character(int label)
 {
-    Character *pDerivedObj = (Character *)malloc(sizeof(Character));
-    Elements *pObj = New_Elements(label);
+    Character* pDerivedObj = (Character*)malloc(sizeof(Character));
+    Elements* pObj = New_Elements(label);
     // load character images
-    char state_string[7][10] = {"idle", "idled",
-                                "up", "down", "left", "right", 
-                                "die"};
+    char state_string[7][10] = { "idle", "idled",
+                                "up", "down", "left", "right",
+                                "die" };
     for (int i = 0; i < 7; i++)
     {
         char buffer[50];
@@ -30,7 +58,7 @@ Elements *New_Character(int label)
         }
     }
     // load effective sound
-    ALLEGRO_SAMPLE *sample = al_load_sample("assets/sound/atk_sound.wav");
+    ALLEGRO_SAMPLE* sample = al_load_sample("assets/sound/atk_sound.wav");
     pDerivedObj->atk_Sound = al_create_sample_instance(sample);
     al_set_sample_instance_playmode(pDerivedObj->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(pDerivedObj->atk_Sound, al_get_default_mixer());
@@ -41,7 +69,7 @@ Elements *New_Character(int label)
     pDerivedObj->height = pDerivedObj->gif_status[0]->height;
     pDerivedObj->x = 300;
     //pDerivedObj->y = HEIGHT - pDerivedObj->height - 60;
-    pDerivedObj->y = HEIGHT/2;
+    pDerivedObj->y = HEIGHT / 2;
     pDerivedObj->hitbox = New_Rectangle(
         pDerivedObj->x,
         pDerivedObj->y,
@@ -61,8 +89,8 @@ Elements *New_Character(int label)
     return pObj;
 }
 
-void Character_update(Elements *self) {
-    Character *chara = ((Character *)(self->pDerivedObj));
+void Character_update(Elements* self) {
+    Character* chara = ((Character*)(self->pDerivedObj));
     // 使用 last_move_dir 來記錄上一幀的上下移動
     // 0: 無, 1: 上, 2: 下
     // 優先判斷移動鍵
@@ -92,75 +120,103 @@ void Character_update(Elements *self) {
         // 根據上一個狀態決定 idle 顯示
         if (chara->last_move_dir == 1) {
             chara->state = IDLED; // 停止上移時顯示 idled
-        } else if (chara->last_move_dir == 2) {
+        }
+        else if (chara->last_move_dir == 2) {
             chara->state = IDLE;  // 停止下移時顯示 idle
-        } else {
+        }
+        else {
             chara->state = IDLE;
         }
     }
 
     //printf("Character position: (%d, %d)\n", chara->x, chara->y);
     // idle動畫循環時自動攻擊
-    if (chara->state == IDLE || chara->state == IDLED) {
-        if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
-            (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
-            Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
-            chara->new_proj = true;
+    ElementVec enemies = _Get_all_the_enemies(scene);
+    for (int i = 0; i < enemies.len; i++) {
+        Elements* e = enemies.arr[i];
+        if (enemies.arr[i]->label == BossEnemy_L) {
+            BossEnemy* enemyObj = (BossEnemy*)(e->pDerivedObj);
+            if (enemyObj->is_invisible) return;
+            if (chara->state == IDLE || chara->state == IDLED) {
+                if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
+                    (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
+                    Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
+                    chara->new_proj = true;
+                }
+                if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
+                    (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
+                    chara->new_proj = false;
+                }
+            }
         }
-        if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
-            (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
-            chara->new_proj = false;
+        else {
+            if (chara->state == IDLE || chara->state == IDLED) {
+                if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 0 && chara->new_proj == false) ||
+                    (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
+                    Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
+                    chara->new_proj = true;
+                }
+                if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
+                    (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
+                    chara->new_proj = false;
+                }
+            }
         }
     }
-/*
-    // 動畫結束自動回到IDLE
-    if (chara->gif_status[chara->state] && chara->gif_status[chara->state]->done) {
-        chara->state = IDLE;
-    }
+    /*
+// 動畫結束自動回到IDLE
+if (chara->gif_status[chara->state] && chara->gif_status[chara->state]->done) {
+    chara->state = IDLE;
+}
 */
     if (chara->hp <= 0) {
         chara->state = DIE;
         if (chara->gif_status[DIE] && chara->gif_status[DIE]->done)
-            self->dele = true;    
+            self->dele = true;
     }
 }
 
-void Character_draw(Elements *self)
+void Character_draw(Elements* self)
 {
-    Character *chara = ((Character *)(self->pDerivedObj));
-    ALLEGRO_BITMAP *frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
+    Character* chara = ((Character*)(self->pDerivedObj));
+    ALLEGRO_BITMAP* frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     int draw_x = chara->x + 20;
     int draw_y = chara->y - chara->height / 2 - 10;
     int weapon_x = chara->x + chara->width / 2 - 30;
-    int weapon_y = chara->y - chara -> height / 3 + 10;
+    int weapon_y = chara->y - chara->height / 3 + 10;
 
     if (chara->state == IDLE && chara->last_proj) {
         // idle 狀態：武器在角色後面
         Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
-    } else if (chara->state == IDLED && chara->last_proj) {
+    }
+    else if (chara->state == IDLED && chara->last_proj) {
         // idled 狀態：武器在角色前面
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
         Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
-    } else {
+    }
+    else {
         // 其他狀態只畫角色
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
 
+    //BossEnemy* e = self->pDerivedObj;
     // idle動畫到特定幀時播放攻擊音效
+    //if (e->state != BOSS_BE_STATE_STEALTH_OUT) {
     if ((chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound) ||
         (chara->state == IDLED && chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 2 && chara->atk_Sound))
     {
         al_play_sample_instance(chara->atk_Sound);
     }
 }
+//}
 
-void Character_destory(Elements *self)
+void Character_destory(Elements* self)
 {
-    Character *Obj = ((Character *)(self->pDerivedObj));
+    Character* Obj = ((Character*)(self->pDerivedObj));
     if (Obj->atk_Sound)
         al_destroy_sample_instance(Obj->atk_Sound);
     for (int i = 0; i < 7; i++)
@@ -172,7 +228,7 @@ void Character_destory(Elements *self)
     free(self);
 }
 
-void _Character_update_position(Elements *self, int dx, int dy)
+void _Character_update_position(Elements* self, int dx, int dy)
 {
     Character* chara = ((Character*)(self->pDerivedObj));
     // GameScene* gs = ((GameScene*)(self->pDerivedObj));
@@ -197,10 +253,10 @@ void _Character_update_position(Elements *self, int dx, int dy)
     //if (new_y > HEIGHT - chara->height) new_y = HEIGHT - chara->height;
     //if (new_y > HEIGHT+60 - chara->height) new_y = HEIGHT+60 - chara->height;
     //if (new_y > map_height - chara->height) new_y = map_height - chara->height;
-    
+
     chara->x = new_x;
     chara->y = new_y;
 }
 
-void Character_interact(Elements *self) {
+void Character_interact(Elements* self) {
 }
