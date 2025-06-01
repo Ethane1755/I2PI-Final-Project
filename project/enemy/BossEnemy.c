@@ -9,10 +9,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../shapes/Point.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+//extern Point Camera;
 
 bool isPositionValid(float x, float y, int width, int height) {
     // if (x < 0 || y < 0 || x + width > 1440 || y + height > 900) {
@@ -346,6 +349,8 @@ void BossEnemy_update(Elements *self) {
     if (e->hitbox) {
         e->hitbox->update(e->hitbox, e->x, e->y, e->x + e->width, e->y + e->height);
     }
+
+    //printf("Boss draw at: (%.1f, %.1f)\n", e->x, e->y);
 }
 
 void BossEnemy_draw(Elements *self) {
@@ -418,15 +423,23 @@ void BossEnemy_draw(Elements *self) {
         int flags = e->dir ? ALLEGRO_FLIP_HORIZONTAL : 0;
 
         if (e->dir) {
-            draw_x += al_get_bitmap_width(bmp) / 2;
+            draw_x += al_get_bitmap_width(bmp) / 4;
         } else {
-            draw_x -= al_get_bitmap_width(bmp) / 2;
+            draw_x -= al_get_bitmap_width(bmp) / 4;
         }
         
         al_draw_scaled_bitmap(bmp, 0, 0,
             al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
             draw_x, e->y, e->width, e->height, flags);
+
+        // al_draw_scaled_bitmap(
+        //     bmp, 0, 0,
+        //     al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+        //     e->x - Camera.x, e->y - Camera.y, // 只在這裡減 Camera
+        //     e->width, e->height, flags
+        // );
     }
+    
 }
 
 void BossEnemy_interact(Elements *self) {
