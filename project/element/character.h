@@ -29,7 +29,10 @@ typedef struct _Character
     Shape *hitbox; // the hitbox of object
     int hp;        // 玩家血量
     int last_move_dir;
+    float weapon_angle;
+    struct _Projectile *last_proj; // 新增這一行
 } Character;
+
 Elements *New_Character(int label);
 void Character_update(Elements *self);
 void Character_interact(Elements *self);
