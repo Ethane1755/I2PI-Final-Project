@@ -9,8 +9,9 @@
 */
 typedef struct _Menu
 {
-    ALLEGRO_FONT *font;
-    ALLEGRO_SAMPLE *song;
+    ALLEGRO_BITMAP* background;
+    ALLEGRO_FONT* font;
+    ALLEGRO_SAMPLE* song;
     ALLEGRO_SAMPLE_INSTANCE *sample_instance;
     int title_x, title_y;
 } Menu;
