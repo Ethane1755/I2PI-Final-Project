@@ -11,13 +11,17 @@ Elements* New_Teleport(int label)
     Teleport* pDerivedObj = (Teleport*)malloc(sizeof(Teleport));
     Elements* pObj = New_Elements(label);
     // setting derived object member
-    pDerivedObj->img = al_load_bitmap("assets/image/1teleport.png");
+    //pDerivedObj->img = al_load_bitmap("assets/image/1teleport.png");
+    //pDerivedObj->img = al_load_bitmap("assets/image/teleport_00.png");
+    pDerivedObj->img = al_load_bitmap("assets/image/teleport_inv.png");
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
     pDerivedObj->height = al_get_bitmap_height(pDerivedObj->img);
     // pDerivedObj->x = WIDTH - pDerivedObj->width;
     // pDerivedObj->y = HEIGHT - pDerivedObj->height;
     pDerivedObj->x = WIDTH - pDerivedObj->width - 32;
     pDerivedObj->y = HEIGHT - pDerivedObj->height;
+    // pDerivedObj->x = 750;
+    // pDerivedObj->y = 642;
     pDerivedObj->activate = false;
     // setting the interact object
     pObj->inter_obj[pObj->inter_len++] = Character_L;

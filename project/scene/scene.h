@@ -21,7 +21,8 @@ typedef struct Element_vector
 typedef struct _Scene Scene;
 typedef void (*fptrUpdate)(Scene *);
 typedef void (*fptrDraw)(Scene *);
-typedef void (*fptrDestroy)(Scene *);
+typedef void (*fptrDestroy)(Scene*);
+typedef void (*fptrInit)(Scene*);
 struct _Scene
 {
     int label;
@@ -33,6 +34,10 @@ struct _Scene
     fptrUpdate Update;
     fptrDraw Draw;
     fptrDestroy Destroy;
+
+    fptrInit Init; //added
+    char* name;   //added
+
 };
 Scene *New_Scene(int label);
 void _Register_elements(Scene *scene, Elements *ele);

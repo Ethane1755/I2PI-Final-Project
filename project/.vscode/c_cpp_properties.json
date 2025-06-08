@@ -11,7 +11,7 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "${workspaceFolder}\\..\\MinGW\\bin\\g++.exe",
+            "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
             "compilerArgs": [
                 "-std=c++17",
                 "-Wall",

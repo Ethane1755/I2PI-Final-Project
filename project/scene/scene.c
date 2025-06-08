@@ -96,3 +96,12 @@ Scene *New_Scene(int label)
     pObj->pDerivedObj = pObj;
     return pObj;
 }
+
+Scene* current_scene = NULL;
+void change_scene(Scene* next_scene) {
+    if (current_scene && current_scene->Destroy)
+        current_scene->Destroy(current_scene);
+    current_scene = next_scene;
+    if (current_scene && current_scene->Init)
+        current_scene->Init(current_scene);
+}

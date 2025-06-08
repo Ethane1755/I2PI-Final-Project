@@ -180,7 +180,7 @@ void Character_draw(Elements* self)
 {
     Character* chara = ((Character*)(self->pDerivedObj));
     ALLEGRO_BITMAP* frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
-    int draw_x = chara->x + 20;
+    int draw_x = chara->x+20 ;
     int draw_y = chara->y - chara->height / 2 - 10;
     int weapon_x = chara->x + chara->width / 2 - 30;
     int weapon_y = chara->y - chara->height / 3 + 10;
@@ -249,7 +249,7 @@ void _Character_update_position(Elements* self, int dx, int dy)
     //if (new_x > WIDTH - chara->width) new_x = WIDTH - chara->width;
     if (new_x > 768) new_x = 768;
     if (new_y < 16) new_y = 16;
-    if (new_y > HEIGHT) new_y = HEIGHT;
+    if (new_y > HEIGHT-10) new_y = HEIGHT-10;
     //if (new_y > HEIGHT - chara->height) new_y = HEIGHT - chara->height;
     //if (new_y > HEIGHT+60 - chara->height) new_y = HEIGHT+60 - chara->height;
     //if (new_y > map_height - chara->height) new_y = map_height - chara->height;

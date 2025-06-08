@@ -17,12 +17,14 @@
 */
 // Character character; //character
 
+
+
 Scene* New_GameScene(int label)
 {
     GameScene* pDerivedObj = (GameScene*)malloc(sizeof(GameScene));
     Scene* pObj = New_Scene(label);
     // setting derived object member
-    pDerivedObj->background = al_load_bitmap("assets/image/map2.png");
+    pDerivedObj->background = al_load_bitmap("assets/image/firstmap.png");
     pObj->pDerivedObj = pDerivedObj;
     // register element
     //_Register_elements(pObj, New_Floor(Floor_L));
@@ -63,6 +65,30 @@ void game_scene_update(Scene* self)
             _Remove_elements(self, ele);
     }
 
+    GameScene* gs = (GameScene*)self->pDerivedObj;
+    if (gs->state == 0) {
+        // ...原本的遊戲邏輯
+        // if (enemynumber == 0) { // 等黎寫完有幾隻怪物再改
+        //     gs->state = 1;
+        //     gs->timer = 0;
+        // }  
+    }
+    else if (gs->state == 1) {
+        gs->timer += 1.0 / 60.0; // 假設你每幀呼叫一次，且 FPS=60
+        if (gs->timer >= 5.0) {
+            gs->state = 2;
+            gs->timer = 0;
+            if (!gs->win_img)
+                gs->win_img = al_load_bitmap("assets/image/win.png");
+        }
+    }
+    else if (gs->state == 2) {
+        gs->timer += 1.0 / 60.0;
+        if (gs->timer >= 5.0) {
+            // 切換到下一個場景或結束遊戲
+            // change_scene(create_menu_scene());
+        }
+    }
 }
 
 void game_scene_draw(Scene* self)
@@ -72,19 +98,19 @@ void game_scene_draw(Scene* self)
 
     // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
-    //int chara_x = 0;
+    int chara_x = 0;
     int chara_y = 0;
     for (int i = 0; i < allEle.len; i++) {
         Elements* ele = allEle.arr[i];
         if (ele->label == Character_L) {
             Character* chara = (Character*)(ele->pDerivedObj);
-            //chara_x = chara->x;
+            chara_x = chara->x;
             chara_y = chara->y;
             break;
         }
     }
 
-    //printf("Character position: (%d, %d)\n", chara_x, chara_y);
+    printf("Character position: (%d, %d)\n", chara_x, chara_y);
 
     // 計算 Camera
     Point Camera;
