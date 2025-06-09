@@ -28,7 +28,7 @@ Scene* New_GameScene(int label)
     // Initialize members to NULL
     pDerivedObj->background = NULL;
     pDerivedObj->win_img = NULL;
-    pDerivedObj->win_show = false;
+
     
     // Load background
     pDerivedObj->background = al_load_bitmap("assets/image/firstmap.png");
@@ -105,63 +105,65 @@ void game_scene_update(Scene* self)
     //printf("Enemy count: %d\n", allEnemies.len);
 
     if (allEnemies.len == 0) {
-
-        // Only do this once when enemies are first cleared
-        if (!gs->win_show) {
-            printf("All enemies defeated! Transitioning to win screen...\n");
+        self->scene_end = true;
+        window = 4;
+        return;
+        // // Only do this once when enemies are first cleared
+        
+        //     printf("All enemies defeated! Transitioning to win screen...\n");
             
-            // Clean up game elements
-            ElementVec allEle = _Get_all_elements(self);
-            for (int i = 0; i < allEle.len; i++) {
-                Elements* ele = allEle.arr[i];
-                ele->Destroy(ele);
-            }
+        //     // Clean up game elements
+        //     ElementVec allEle = _Get_all_elements(self);
+        //     for (int i = 0; i < allEle.len; i++) {
+        //         Elements* ele = allEle.arr[i];
+        //         ele->Destroy(ele);
+        //     }
 
-            // Clean up background and load win screen
-            if (gs->background) {
-                al_destroy_bitmap(gs->background);
-                gs->background = NULL;
-            }
+        //     // Clean up background and load win screen
+        //     if (gs->background) {
+        //         al_destroy_bitmap(gs->background);
+        //         gs->background = NULL;
+        //     }
 
 
-        //gs->timer = 0;
+        // //gs->timer = 0;
 
         
-        ElementVec allEle = _Get_all_elements(self);
-        for (int i = 0; i < allEle.len; i++) {
-            Elements* ele = allEle.arr[i];
-            ele->Destroy(ele);
-        }
-        if (gs->background) {
-            al_destroy_bitmap(gs->background);
-            gs->background = NULL;
-        }
-        if (!gs->win_img) {
+        // ElementVec allEle = _Get_all_elements(self);
+        // for (int i = 0; i < allEle.len; i++) {
+        //     Elements* ele = allEle.arr[i];
+        //     ele->Destroy(ele);
+        // }
+        // if (gs->background) {
+        //     al_destroy_bitmap(gs->background);
+        //     gs->background = NULL;
+        // }
+        // if (!gs->win_img) {
 
-            gs->win_img = al_load_bitmap("assets/image/win.png");
-            if (!gs->win_img) {
-                fprintf(stderr, "Failed to load win screen image!\n");
-            }
-            gs->win_show = true;
-            printf("Win screen loaded and ready\n");
-        }
+        //     gs->win_img = al_load_bitmap("assets/image/win.png");
+        //     if (!gs->win_img) {
+        //         fprintf(stderr, "Failed to load win screen image!\n");
+        //     }
+        //     gs->win_show = true;
+        //     printf("Win screen loaded and ready\n");
+        // }
 
-        // Handle transition to next scene
-        if (key_state[ALLEGRO_KEY_ENTER]) {
-            printf("Enter pressed - transitioning to next scene\n");
+        // // Handle transition to next scene
+        // if (key_state[ALLEGRO_KEY_ENTER]) {
+        //     printf("Enter pressed - transitioning to next scene\n");
             
-            // Clean up any remaining resources before transition
-            if (gs->win_img) {
-                al_destroy_bitmap(gs->win_img);
-                gs->win_img = NULL;
-            }
+        //     // Clean up any remaining resources before transition
+        //     if (gs->win_img) {
+        //         al_destroy_bitmap(gs->win_img);
+        //         gs->win_img = NULL;
+        //     }
             
-            // Set up transition
-            self->scene_end = true;
-            window = 2;  // GameScene2_L
-            printf("Scene transition prepared: window = %d\n", window);
-            return;
-        }
+        //     // Set up transition
+        //     self->scene_end = true;
+        //     window = 2;  // GameScene2_L
+        //     printf("Scene transition prepared: window = %d\n", window);
+        //     return;
+        // }
     }
 }
 
@@ -230,10 +232,6 @@ void draw_health_bar(int x, int y, int width, int height, float current_hp, floa
             al_draw_text(font, al_map_rgb(255, 255, 255), x + width/2, y + height/2 - 6,
                         ALLEGRO_ALIGN_CENTER, hp_text);
         }
-
-        self->scene_end = true;
-        window = 4;
-        return;
     }
     
 }
@@ -245,24 +243,24 @@ void game_scene_draw(Scene* self)
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
     
     // 显示胜利画面
-    if (gs->win_show) {
-        if (gs->win_img) {
-            al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, 
-                          (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
-        } else {
-            static ALLEGRO_FONT* font = NULL;
-            if (!font) {
-                font = al_create_builtin_font();
-            }
-            if (font) {
-                al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 - 20,
-                            ALLEGRO_ALIGN_CENTER, "Victory!");
-                al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 + 20,
-                            ALLEGRO_ALIGN_CENTER, "Press Enter to continue");
-            }
+    
+    if (gs->win_img) {
+        al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, 
+                        (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
+    } else {
+        static ALLEGRO_FONT* font = NULL;
+        if (!font) {
+            font = al_create_builtin_font();
         }
-        return;
+        if (font) {
+            al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 - 20,
+                        ALLEGRO_ALIGN_CENTER, "Victory!");
+            al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 + 20,
+                        ALLEGRO_ALIGN_CENTER, "Press Enter to continue");
+        }
     }
+    return;
+    
 
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
     
