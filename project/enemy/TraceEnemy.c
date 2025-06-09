@@ -35,7 +35,7 @@ Elements *New_TraceEnemy(int label, int x, int y) {
     enemy->y = y;
     enemy->speed = 1;
     enemy->dir = false;
-    enemy->hp = 6; 
+    enemy->hp = 10;  // TraceEnemy HP
     enemy->damage = 1;
     enemy->last_damage_time = 0;
 

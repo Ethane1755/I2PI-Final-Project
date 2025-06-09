@@ -39,10 +39,72 @@ ElementVec _Get_all_enemies(Scene* scene) {
     return allEnemies;
 }
 
-Elements* New_Projectile(int label, int x, int y, int v)
-{
+Elements* New_Projectile(int label, int x, int y, int v) {
     Projectile* pDerivedObj = (Projectile*)malloc(sizeof(Projectile));
     Elements* pObj = New_Elements(label);
+    
+    // Find closest enemy at creation time
+    ElementVec enemies = _Get_all_enemies(scene);
+    float tx = -1, ty = -1, min_dist = 1e9;
+    float px = x;
+    float py = y;
+
+    for (int i = 0; i < enemies.len; i++) {
+        Elements* e = enemies.arr[i];
+        
+        // Skip if it's an invisible boss
+        if (e->label == BossEnemy_L) {
+            BossEnemy* boss = (BossEnemy*)(e->pDerivedObj);
+            if (boss->is_invisible) continue;
+        }
+
+        float ex, ey;
+        if (e->label == BossEnemy_L) {
+            BossEnemy* enemy = (BossEnemy*)(e->pDerivedObj);
+            ex = enemy->x + enemy->width / 2.0f;
+            ey = enemy->y + enemy->height / 3.0f * 2.0f;
+        } else if (e->label == BulletEnemy_L) {
+            BulletEnemy* enemy = (BulletEnemy*)(e->pDerivedObj);
+            ex = enemy->x + enemy->width / 2.0f;
+            ey = enemy->y + enemy->height / 3.0f * 2.0f;
+        } else if (e->label == TraceEnemy_L) {
+            TraceEnemy* enemy = (TraceEnemy*)(e->pDerivedObj);
+            ex = enemy->x + enemy->width / 2.0f;
+            ey = enemy->y + enemy->height / 3.0f * 2.0f;
+        } else {
+            BasicEnemy* enemy = (BasicEnemy*)(e->pDerivedObj);
+            ex = enemy->x + enemy->width / 2.0f;
+            ey = enemy->y + enemy->height / 3.0f * 2.0f;
+        }
+
+        float dx = ex - px;
+        float dy = ey - py;
+        float dist = sqrt(dx * dx + dy * dy);
+        
+        if (dist < min_dist) {
+            min_dist = dist;
+            tx = ex;
+            ty = ey;
+        }
+    }
+
+    // Set initial direction based on target
+    float dx = 0, dy = -v; // Default direction (up)
+    float angle = -ALLEGRO_PI/2; // Default angle (up)
+    
+    if (min_dist < 1e9) {
+        // Calculate direction to target
+        dx = tx - px;
+        dy = ty - py;
+        float len = sqrt(dx * dx + dy * dy);
+        if (len > 0) {
+            float speed = abs(v);
+            dx = (dx / len) * speed;
+            dy = (dy / len) * speed;
+            angle = atan2(dy, dx);
+        }
+    }
+
     // setting derived object member
     pDerivedObj->img = al_load_bitmap("assets/image/projectile.png");
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
@@ -50,12 +112,19 @@ Elements* New_Projectile(int label, int x, int y, int v)
     pDerivedObj->x = x;
     pDerivedObj->y = y;
     pDerivedObj->v = v;
+    // Set the projectile's direction and angle
+    pDerivedObj->last_dx = dx;
+    pDerivedObj->last_dy = dy;
+    pDerivedObj->angle = angle;
     pDerivedObj->hitbox = New_Circle(pDerivedObj->x + pDerivedObj->width / 2,
         pDerivedObj->y + pDerivedObj->height / 2,
         min(pDerivedObj->width, pDerivedObj->height) / 2);
     // setting the interact object
-    //pObj->inter_obj[pObj->inter_len++] = Tree_L;
     pObj->inter_obj[pObj->inter_len++] = Floor_L;
+    pObj->inter_obj[pObj->inter_len++] = BasicEnemy_L;
+    pObj->inter_obj[pObj->inter_len++] = BulletEnemy_L;
+    pObj->inter_obj[pObj->inter_len++] = TraceEnemy_L;
+    pObj->inter_obj[pObj->inter_len++] = BossEnemy_L;
     // setting derived object function
     pObj->pDerivedObj = pDerivedObj;
     pObj->Update = Projectile_update;
@@ -76,127 +145,84 @@ void _Projectile_update_position(Elements* self, float dx, float dy) {
     }
 }
 
-void Projectile_update(Elements* self)
-{
+void Projectile_update(Elements* self) {
     Projectile* Obj = ((Projectile*)(self->pDerivedObj));
-    ElementVec enemies = _Get_all_enemies(scene);
-    float tx = -1, ty = -1, min_dist = 1e9;
-
-    for (int i = 0; i < enemies.len; i++) {
-        Elements* e = enemies.arr[i];
-        if (enemies.arr[i]->label == BossEnemy_L) {
-            BossEnemy* enemyObj = (BossEnemy*)(e->pDerivedObj);
-            if (enemyObj->is_invisible) return;
-            float ex = enemyObj->x + enemyObj->width / 2.0f;
-            float ey = enemyObj->y + enemyObj->height / 3.0f * 2.0f;
-            float px = Obj->x + Obj->width / 2.0f;
-            float py = Obj->y + Obj->height / 2.0f;
-            float dx = ex - px;
-            float dy = ey - py;
-            float dist = sqrt(dx * dx + dy * dy);
-            if (dist < min_dist) {
-                min_dist = dist;
-                tx = ex;
-                ty = ey;
-            }
-        }
-        else if (enemies.arr[i]->label == BulletEnemy_L) {
-            BulletEnemy* enemyObj = (BulletEnemy*)(e->pDerivedObj);
-            float ex = enemyObj->x + enemyObj->width / 2.0f;
-            float ey = enemyObj->y + enemyObj->height / 3.0f * 2.0f;
-            float px = Obj->x + Obj->width / 2.0f;
-            float py = Obj->y + Obj->height / 2.0f;
-            float dx = ex - px;
-            float dy = ey - py;
-            float dist = sqrt(dx * dx + dy * dy);
-            if (dist < min_dist) {
-                min_dist = dist;
-                tx = ex;
-                ty = ey;
-            }
-        }
-        else if (enemies.arr[i]->label == TraceEnemy_L) {
-            TraceEnemy* enemyObj = (TraceEnemy*)(e->pDerivedObj);
-            float ex = enemyObj->x + enemyObj->width / 2.0f;
-            float ey = enemyObj->y + enemyObj->height / 3.0f * 2.0f;
-            float px = Obj->x + Obj->width / 2.0f;
-            float py = Obj->y + Obj->height / 2.0f;
-            float dx = ex - px;
-            float dy = ey - py;
-            float dist = sqrt(dx * dx + dy * dy);
-            if (dist < min_dist) {
-                min_dist = dist;
-                tx = ex;
-                ty = ey;
-            }
-        }
-        else {
-            BasicEnemy* enemyObj = (BasicEnemy*)(e->pDerivedObj);
-            float ex = enemyObj->x + enemyObj->width / 2.0f;
-            float ey = enemyObj->y + enemyObj->height / 3.0f * 2.0f;
-            float px = Obj->x + Obj->width / 2.0f;
-            float py = Obj->y + Obj->height / 2.0f;
-            float dx = ex - px;
-            float dy = ey - py;
-            float dist = sqrt(dx * dx + dy * dy);
-            if (dist < min_dist) {
-                min_dist = dist;
-                tx = ex;
-                ty = ey;
-            }
-        }
-    }
-
-    if (min_dist < 1e9) {
-        float px = Obj->x + Obj->width / 2.0f;
-        float py = Obj->y + Obj->height / 2.0f;
-        float dx = tx - px;
-        float dy = ty - py;
-        float len = sqrt(dx * dx + dy * dy);
-        if (len > 0) {
-            float speed = abs(Obj->v);
-            dx = dx / len * speed;
-            dy = dy / len * speed;
-            Obj->angle = atan2(dy, dx);
-            _Projectile_update_position(self, dx, dy);
-            return;
-        }
-        else {
-            Obj->angle = -ALLEGRO_PI / 2; // 預設向上
-            _Projectile_update_position(self, 0, -Obj->v);
-        }
-    }
-    Obj->angle = -ALLEGRO_PI / 2;
-    _Projectile_update_position(self, 0, -Obj->v);
+    // Simply move in the initial direction without changing it
+    _Projectile_update_position(self, Obj->last_dx, Obj->last_dy);
 }
 
-void Projectile_interact(Elements* self)
-{
-    for (int j = 0; j < self->inter_len; j++)
-    {
+void Projectile_interact(Elements* self) {
+    for (int j = 0; j < self->inter_len; j++) {
         int inter_label = self->inter_obj[j];
         ElementVec labelEle = _Get_label_elements(scene, inter_label);
-        for (int i = 0; i < labelEle.len; i++)
-        {
-            if (inter_label == Floor_L)
-            {
+        for (int i = 0; i < labelEle.len; i++) {
+            if (inter_label == Floor_L) {
                 _Projectile_interact_Floor(self, labelEle.arr[i]);
+            } else if (inter_label == BasicEnemy_L || 
+                      inter_label == BulletEnemy_L || 
+                      inter_label == TraceEnemy_L ||
+                      inter_label == BossEnemy_L) {
+                _Projectile_interact_Enemy(self, labelEle.arr[i]);
             }
-            /*else if (inter_label == Tree_L)
-            {
-                _Projectile_interact_Tree(self, labelEle.arr[i]);
-            }*/
         }
     }
 }
 
-void _Projectile_interact_Floor(Elements* self, Elements* tar)
-{
+void _Projectile_interact_Enemy(Elements* self, Elements* tar) {
+    Projectile* bullet = (Projectile*)(self->pDerivedObj);
+    BasicEnemy* enemy = (BasicEnemy*)(tar->pDerivedObj);
+    
+    // Skip if enemy is invisible (e.g., boss in stealth)
+    if (tar->label == BossEnemy_L && ((BossEnemy*)tar->pDerivedObj)->is_invisible) {
+        return;
+    }
+    
+    // Get enemy center position
+    float enemy_center_x = enemy->x + enemy->width / 2.0f;
+    float enemy_center_y = enemy->y + enemy->height / 2.0f;
+    
+    // Get bullet center position
+    float bullet_center_x = bullet->x + bullet->width / 2.0f;
+    float bullet_center_y = bullet->y + bullet->height / 2.0f;
+    
+    // Calculate distance to enemy center
+    float dx = enemy_center_x - bullet_center_x;
+    float dy = enemy_center_y - bullet_center_y;
+    float dist = sqrt(dx*dx + dy*dy);
+    
+    // Check if bullet is close enough to enemy center (using a small threshold)
+    float hit_threshold = enemy->width / 4.0f; // Adjust this value to control how close to center
+    
+    if (dist <= hit_threshold) {
+        // Calculate knockback direction from center
+        if (dist > 0) {
+            dx = (dx/dist) * 30;
+            dy = (dy/dist) * 30;
+        }
+        
+        // Apply damage and knockback based on enemy type
+        if (tar->label == BasicEnemy_L) {
+            BasicEnemy_take_damage(tar, 1, dx, dy);
+        } else if (tar->label == BulletEnemy_L) {
+            BulletEnemy_take_damage(tar, 1, dx, dy);
+        } else if (tar->label == TraceEnemy_L) {
+            TraceEnemy_take_damage(tar, 1, dx, dy);
+        } else if (tar->label == BossEnemy_L) {
+            BossEnemy_interact(tar); // Boss has its own damage handling
+        }
+        
+        // Destroy the projectile on hit
+        self->dele = true;
+    }
+}
+
+void _Projectile_interact_Floor(Elements* self, Elements* tar) {
     Projectile* Obj = ((Projectile*)(self->pDerivedObj));
-    if (Obj->x < 0 - Obj->width)
+    // Delete projectile when it hits any wall
+    if (Obj->x < 0 || Obj->x > WIDTH || Obj->y < 0 || Obj->y > HEIGHT) {
+        printf("Projectile hit wall at (%.1f,%.1f)\n", Obj->x, Obj->y);
         self->dele = true;
-    else if (Obj->x > WIDTH + Obj->width)
-        self->dele = true;
+    }
 }
 
 void _Projectile_interact_Tree(Elements* self, Elements* tar)

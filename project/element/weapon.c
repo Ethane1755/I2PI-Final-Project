@@ -33,17 +33,23 @@ void Weapon_draw_rotated(int x, int y, float angle) {
 
 void Character_fire_projectile(Character *chara, int state) {
     int proj_x = chara->x + chara->width / 2;
-    int proj_y;
-    int proj_v = 0;
-    if (state == IDLE) {
-        proj_y = chara->y;
-        proj_v = 5;
-    } else {
-        proj_y = chara->y;
-        proj_v = -5;
+    int proj_y = chara->y;
+    int proj_speed = 10; // Increased speed for better responsiveness
+    
+    // Default direction is up/down based on state
+    float default_angle = (state == IDLE) ? -ALLEGRO_PI/2 : ALLEGRO_PI/2;
+    
+    Elements *pro = New_Projectile(Projectile_L, proj_x, proj_y, proj_speed);
+    if (pro) {
+        _Register_elements(scene, pro);
+        // 記錄最後一顆 projectile
+        chara->last_proj = (Projectile *)(pro->pDerivedObj);
+        
+        // If no target was found, manually set the angle
+        if (chara->last_proj->angle == 0) {
+            chara->last_proj->angle = default_angle;
+            chara->last_proj->last_dx = proj_speed * cos(default_angle);
+            chara->last_proj->last_dy = proj_speed * sin(default_angle);
+        }
     }
-    Elements *pro = New_Projectile(Projectile_L, proj_x, proj_y, proj_v);
-    _Register_elements(scene, pro);
-    // 記錄最後一顆 projectile
-    chara->last_proj = (Projectile *)(pro->pDerivedObj);
 }

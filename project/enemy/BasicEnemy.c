@@ -36,8 +36,8 @@ Elements *New_BasicEnemy(int label, int x, int y) {
     enemy->y = y;
     enemy->speed = 1;
     enemy->dir = false;
-    enemy->hp = 6;
-    enemy->damage = 1;
+    enemy->hp = 5;  // Basic enemy HP
+    enemy->damage = 10;  // Increased from 1 to make combat more challenging
     enemy->last_damage_time = 0;
 
     enemy->hitbox = New_Rectangle(x, y, x + enemy->width, y + enemy->height);

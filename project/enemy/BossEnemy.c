@@ -106,8 +106,8 @@ Elements *New_BossEnemy(int label, int x, int y) {
     e->width = al_get_bitmap_width(e->walk_frames[0]) * 2;
     e->height = al_get_bitmap_height(e->walk_frames[0]) * 2;
     e->hitbox = New_Rectangle(x, y, x + e->width, y + e->height);
-    e->hp = 30;
-    e->damage = 5;
+    e->hp = 25;  // Boss HP
+    e->damage = 15;  // Increased from 5 to make boss more threatening
     e->dir = false;
     e->frame = 0;
     e->frame_duration = 0.1;
