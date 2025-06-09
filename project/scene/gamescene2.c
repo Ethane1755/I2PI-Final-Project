@@ -41,10 +41,10 @@ Scene* New_GameScene2(int label)
     //_Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
-    //_Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
-   // _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
-    _Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
-    //_Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
+    _Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
+    _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
+    // _Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
+    // _Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
     // setting derived object function
     pObj->Update = game_scene2_update;
     pObj->Draw = game_scene2_draw;
@@ -53,8 +53,8 @@ Scene* New_GameScene2(int label)
 }
 void game_scene2_update(Scene* self)
 {
-    GameScene2* gs = (GameScene2*)self->pDerivedObj;    
-    
+    GameScene2* gs = (GameScene2*)self->pDerivedObj;
+
     // update every element
     ElementVec allEle = _Get_all_elements(self);
 
@@ -94,10 +94,10 @@ void game_scene2_update(Scene* self)
         if (ele->dele)
             _Remove_elements(self, ele);
     }
-    
+
     ElementVec allEnemies = _Get_all_enemies(self);
 
-    
+
     //gs->timer = 0;  
     if (allEnemies.len == 0) {
         //gs->timer = 0;
@@ -106,28 +106,6 @@ void game_scene2_update(Scene* self)
         return;
     }
 
-        // ElementVec allEle = _Get_all_elements(self);
-        // for (int i = 0; i < allEle.len; i++) {
-        //     Elements* ele = allEle.arr[i];
-        //     ele->Destroy(ele);
-        // }
-        // if (gs->background) {
-        //     al_destroy_bitmap(gs->background);
-        //     gs->background = NULL;
-        // }
-        // if (!gs->win_img)
-        //     gs->win_img = al_load_bitmap("assets/image/win.png");
-        
-
-        // //gs->timer += 1.0 / 60.0; // 假設你每幀呼叫一次，且 FPS=60
-        // if (key_state[ALLEGRO_KEY_ENTER]) {
-        //     //gs->timer = 0;
-        //     self->scene_end = true;
-        //     window = 3;
-        //     return;
-        // }
-    
-    
 }
 
 void game_scene2_draw(Scene* self)
@@ -161,7 +139,7 @@ void game_scene2_draw(Scene* self)
         Camera.y = 0;
     if (Camera.y > HEIGHT)
         Camera.y = HEIGHT;
-    
+
     al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
 
     for (int i = 0; i < allEle.len; i++)

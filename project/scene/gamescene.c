@@ -107,37 +107,6 @@ void game_scene_update(Scene* self)
         window = 4;
         return;
     }
-        //ElementVec allEle = _Get_all_elements(self);
-        // for (int i = 0; i < allEle.len; i++) {
-        //     Elements* ele = allEle.arr[i];
-        //     ele->Destroy(ele);
-        // }
-        // if (gs->background) {
-        //     al_destroy_bitmap(gs->background);
-        //     gs->background = NULL;
-        // }
-        // if (!gs->win_img) {
-        //     gs->win_img = al_load_bitmap("assets/image/win.png");
-        //     gs->win_show = true;
-        //     printf("gs->win_show=true!\n");
-            
-        // }
-        // //where the game crash
-        // //gs->timer += 1.0 / 60.0;
-        // if (!gs->win_show) {
-        //     printf("still can't press ENTER\n");
-        // }
-        // else {
-        //     // key_state[ALLEGRO_KEY_ENTER] = true;
-        //     if (key_state[ALLEGRO_KEY_ENTER]) {
-        //         //gs->timer = 0;
-        //         // 這裡可以切換到下一個場景
-        //         printf("Set window to %d (GameScene2_L)\n", window);
-        //         self->scene_end = true;
-        //         window = 2;
-        //         return;
-        //     }
-        // }
     
 }
 
@@ -146,12 +115,7 @@ void game_scene_draw(Scene* self)
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
-    // // 只顯示 win 畫面
-    // if (gs->win_img){
-    //     al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
-    //     return;
-    // }
-
+    
     // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
     //int chara_x = 0;
