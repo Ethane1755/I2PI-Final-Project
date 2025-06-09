@@ -96,8 +96,9 @@ void game_scene_update(Scene* self)
         if (ele->dele)
             _Remove_elements(self, ele);
     }
-    GameScene* gs = (GameScene*)self->pDerivedObj;
-    
+
+    // Do NOT redeclare gs here!
+
     ElementVec allEnemies = _Get_all_enemies(self);
     printf("Enemy count: %d\n", allEnemies.len);
 
@@ -108,7 +109,6 @@ void game_scene_update(Scene* self)
         for (int i = 0; i < allEle.len; i++) {
             Elements* ele = allEle.arr[i];
             ele->Destroy(ele);
-          
         }
         if (gs->background) {
             al_destroy_bitmap(gs->background);
@@ -119,8 +119,6 @@ void game_scene_update(Scene* self)
             gs->win_show = true;
             printf("gs->win_show=true!\n");
         }
-            
-    
         //gs->timer += 1.0 / 60.0;
         if (gs->win_show) {
             if (key_state[ALLEGRO_KEY_ENTER]) {
