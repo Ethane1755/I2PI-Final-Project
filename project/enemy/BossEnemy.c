@@ -281,7 +281,7 @@ void BossEnemy_update(Elements *self) {
                 float current_dy = py - (e->target_y + e->height/2);
                 float current_dist = sqrt(current_dx*current_dx + current_dy*current_dy);
                 if (current_dist < spell_range) {
-                    c->hp -= e->damage * 2; // 技能傷害是普攻的2倍
+                    Character_take_damage(player, e->damage * 2);  // 技能傷害是普攻的2倍
                     printf("Player hit by boss spell! HP: %d\n", c->hp);
                 }
             }
@@ -304,7 +304,7 @@ void BossEnemy_update(Elements *self) {
             if (e->frame == 5) {
                 float attack_range = 120;
                 if (dist < attack_range) {
-                    c->hp -= e->damage;
+                    Character_take_damage(player, e->damage * 2);
                     printf("Player hit by boss attack! HP: %d\n", c->hp);
                 }
             }

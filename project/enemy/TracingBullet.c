@@ -149,7 +149,7 @@ void _TracingBullet_interact_Character(Elements *self, Elements *tar) {
     Character *character = (Character *)(tar->pDerivedObj);
     
     if (character->hitbox->overlap(character->hitbox, bullet->hitbox)) {
-        character->hp -= 3; // 子彈傷害在這裡調整!!
+        Character_take_damage(tar, 3); // 子彈傷害在這裡調整!!
         printf("Player hit by tracing bullet! HP: %d\n", character->hp);
         self->dele = true; 
     }
