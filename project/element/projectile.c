@@ -7,6 +7,7 @@
 #include "../enemy/BasicEnemy.h"
 #include "../enemy/BulletEnemy.h"
 #include "../enemy/TraceEnemy.h"
+#include "elementLabel.h"
 
 #include <math.h> // 追蹤敵人需要
 

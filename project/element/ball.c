@@ -6,7 +6,8 @@
 #include "../scene/sceneManager.h" // for scene variable
 #include "../scene/gamescene.h"    // for element label
 #include <allegro5/allegro_primitives.h>
-Elements *New_Ball(int label)
+#include "elementLabel.h"
+Elements* New_Ball(int label)
 {
     Ball *pDerivedObj = (Ball *)malloc(sizeof(Ball));
     Elements *pObj = New_Elements(label);

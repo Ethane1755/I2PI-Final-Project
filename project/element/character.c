@@ -15,7 +15,11 @@
 #include "../enemy/TraceEnemy.h"
 #include <stdio.h>
 #include <stdbool.h>
+
+#include "elementLabel.h"
+
 #include <math.h> // for ALLEGRO_PI
+
 
 ElementVec _Get_all_the_enemies(Scene* scene) {
     ElementVec allEnemies;

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../shapes/Point.h"
+#include "../element/elementLabel.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

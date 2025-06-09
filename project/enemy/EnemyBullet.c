@@ -7,6 +7,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <stdio.h>
+#include "../element/elementLabel.h"
 
 Elements *New_EnemyBullet(int label, float x, float y, float vx, float vy) {
     EnemyBullet *bullet = malloc(sizeof(EnemyBullet));
