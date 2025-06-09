@@ -96,49 +96,16 @@ void game_scene_update(Scene* self)
         if (ele->dele)
             _Remove_elements(self, ele);
     }
-    GameScene* gs = (GameScene*)self->pDerivedObj;
+    //GameScene* gs = (GameScene*)self->pDerivedObj;
     
     ElementVec allEnemies = _Get_all_enemies(self);
     //printf("Enemy count: %d\n", allEnemies.len);
 
     if (allEnemies.len == 0) {
         //gs->timer = 0;
-<<<<<<< Updated upstream
-        
-        ElementVec allEle = _Get_all_elements(self);
-        for (int i = 0; i < allEle.len; i++) {
-            Elements* ele = allEle.arr[i];
-            ele->Destroy(ele);
-          
-        }
-        if (gs->background) {
-            al_destroy_bitmap(gs->background);
-            gs->background = NULL;
-        }
-        if (!gs->win_img) {
-            gs->win_img = al_load_bitmap("assets/image/win.png");
-            gs->win_show = true;
-            printf("gs->win_show=true!\n");
-        }
-            
-    
-        //gs->timer += 1.0 / 60.0;
-        if (gs->win_show) {
-            if (key_state[ALLEGRO_KEY_ENTER]) {
-                //gs->timer = 0;
-                // 這裡可以切換到下一個場景
-                printf("Set window to %d (GameScene2_L)\n", window);
-                self->scene_end = true;
-                window = 2;
-                //printf("Set window to %d (GameScene2_L)\n", window);
-                return;
-            }
-        }        
-=======
         self->scene_end = true;
         window = 4;
         return;
->>>>>>> Stashed changes
     }
         //ElementVec allEle = _Get_all_elements(self);
         // for (int i = 0; i < allEle.len; i++) {
