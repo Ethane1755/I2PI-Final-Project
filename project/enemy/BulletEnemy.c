@@ -35,7 +35,7 @@ Elements *New_BulletEnemy(int label, int x, int y) {
     enemy->y = y;
     enemy->speed = 1;
     enemy->dir = false;
-    enemy->hp = 8; 
+    enemy->hp = 8;  // BulletEnemy HP - already correct!
     enemy->damage = 1;
     enemy->last_damage_time = 0;
 
