@@ -28,7 +28,7 @@ Scene* New_GameScene(int label)
     // Initialize members to NULL
     pDerivedObj->background = NULL;
     pDerivedObj->win_img = NULL;
-    pDerivedObj->win_show = false;
+    pDerivedObj->state = 0;  // 0: 遊戲中
     
     // Load background
     pDerivedObj->background = al_load_bitmap("assets/image/firstmap.png");
@@ -101,64 +101,28 @@ void game_scene_update(Scene* self)
     }
 
     ElementVec allEnemies = _Get_all_enemies(self);
-    //printf("Enemy count: %d\n", allEnemies.len);
-
+    
+    // Check if all enemies are defeated
     if (allEnemies.len == 0) {
-
-        // Only do this once when enemies are first cleared
-        if (!gs->win_show) {
-            printf("All enemies defeated! Transitioning to win screen...\n");
+        // Only load win screen once when in game state
+        if (gs->state == 0) {
+            printf("All enemies defeated! Loading win screen...\n");
             
-            // Clean up game elements
-            ElementVec allEle = _Get_all_elements(self);
-            for (int i = 0; i < allEle.len; i++) {
-                Elements* ele = allEle.arr[i];
-                ele->Destroy(ele);
-            }
-
-            // Clean up background and load win screen
-            if (gs->background) {
-                al_destroy_bitmap(gs->background);
-                gs->background = NULL;
-            }
-
-
-        //gs->timer = 0;
-
-        
-        ElementVec allEle = _Get_all_elements(self);
-        for (int i = 0; i < allEle.len; i++) {
-            Elements* ele = allEle.arr[i];
-            ele->Destroy(ele);
-        }
-        if (gs->background) {
-            al_destroy_bitmap(gs->background);
-            gs->background = NULL;
-        }
-        if (!gs->win_img) {
-
-            gs->win_img = al_load_bitmap("assets/image/win.png");
+            // Load win screen image
             if (!gs->win_img) {
-                fprintf(stderr, "Failed to load win screen image!\n");
+                gs->win_img = al_load_bitmap("assets/image/win.png");
+                if (!gs->win_img) {
+                    fprintf(stderr, "Failed to load win screen image!\n");
+                }
             }
-            gs->win_show = true;
-            printf("Win screen loaded and ready\n");
+            gs->state = 1;  // Set to victory waiting state
         }
-
-        // Handle transition to next scene
+        
+        // Handle transition when Enter is pressed
         if (key_state[ALLEGRO_KEY_ENTER]) {
-            printf("Enter pressed - transitioning to next scene\n");
-            
-            // Clean up any remaining resources before transition
-            if (gs->win_img) {
-                al_destroy_bitmap(gs->win_img);
-                gs->win_img = NULL;
-            }
-            
-            // Set up transition
+            printf("Enter pressed - transitioning to win scene\n");
             self->scene_end = true;
-            window = 2;  // GameScene2_L
-            printf("Scene transition prepared: window = %d\n", window);
+            window = 4;  // WinScene_L
             return;
         }
     }
@@ -216,7 +180,6 @@ void draw_health_bar(int x, int y, int width, int height, float current_hp, floa
             if (!font) {
                 font = al_create_builtin_font();
             }
-
         }
         if (font) {
             char hp_text[32];
@@ -229,54 +192,16 @@ void draw_health_bar(int x, int y, int width, int height, float current_hp, floa
             al_draw_text(font, al_map_rgb(255, 255, 255), x + width/2, y + height/2 - 6,
                         ALLEGRO_ALIGN_CENTER, hp_text);
         }
-
-        self->scene_end = true;
-        window = 4;
-        return;
-
     }
-        //ElementVec allEle = _Get_all_elements(self);
-        // for (int i = 0; i < allEle.len; i++) {
-        //     Elements* ele = allEle.arr[i];
-        //     ele->Destroy(ele);
-        // }
-        // if (gs->background) {
-        //     al_destroy_bitmap(gs->background);
-        //     gs->background = NULL;
-        // }
-        // if (!gs->win_img) {
-        //     gs->win_img = al_load_bitmap("assets/image/win.png");
-        //     gs->win_show = true;
-        //     printf("gs->win_show=true!\n");
-            
-        // }
-        // //where the game crash
-        // //gs->timer += 1.0 / 60.0;
-        // if (!gs->win_show) {
-        //     printf("still can't press ENTER\n");
-        // }
-        // else {
-        //     // key_state[ALLEGRO_KEY_ENTER] = true;
-        //     if (key_state[ALLEGRO_KEY_ENTER]) {
-        //         //gs->timer = 0;
-        //         // 這裡可以切換到下一個場景
-        //         printf("Set window to %d (GameScene2_L)\n", window);
-        //         self->scene_end = true;
-        //         window = 2;
-        //         return;
-        //     }
-        // }
-    
 }
-// 在 game_scene_draw 函数中，修改敌人血条绘制部分
 
 void game_scene_draw(Scene* self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
     
-    // 显示胜利画面
-    if (gs->win_show) {
+    // 显示胜利画面 (state: 1=等待, 2=显示)
+    if (gs->state >= 1) {  // Show win screen in victory states (waiting or showing)
         if (gs->win_img) {
             al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, 
                           (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
@@ -295,22 +220,13 @@ void game_scene_draw(Scene* self)
         return;
     }
 
-    GameScene* gs = ((GameScene*)(self->pDerivedObj));
-    // // 只顯示 win 畫面
-    // if (gs->win_img){
-    //     al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
-    //     return;
-    // }
-
     // 获取角色坐标进行摄影机计算
     ElementVec allEle = _Get_all_elements(self);
-    //int chara_x = 0;
     int chara_y = 0;
     for (int i = 0; i < allEle.len; i++) {
         Elements* ele = allEle.arr[i];
         if (ele->label == Character_L) {
             Character* chara = (Character*)(ele->pDerivedObj);
-            //chara_x = chara->x;
             chara_y = chara->y;
             break;
         }
@@ -354,15 +270,13 @@ void game_scene_draw(Scene* self)
                 // 对于Boss敌人，使用BossEnemy结构
                 BossEnemy* boss = (BossEnemy*)(ele->pDerivedObj);
                 
-                // 检查Boss是否应该显示（根据你的Boss逻辑）
-                // 假设Boss有一个visible或active字段，如果没有可以根据其他条件判断
-                bool boss_visible = true; // 默认可见
-                
-                // 如果Boss有特定的显示状态检查，在这里添加
-                // 例如：boss_visible = boss->visible || boss->active || boss->hp > 0;
-                
-                if (!boss_visible) {
-                    continue; // 跳过不可见的Boss，不绘制血条
+                // Don't show health bar if boss is dead/dying, has no health, or in stealth
+                if (boss->state == BOSS_BE_STATE_DIE || 
+                    boss->state == BOSS_BE_STATE_STEALTH_IN ||
+                    boss->state == BOSS_BE_STATE_STEALTH_OUT ||
+                    boss->hp <= 0 ||
+                    boss->is_invisible) {
+                    continue;
                 }
                 
                 bar_width = 120;
@@ -431,7 +345,6 @@ void game_scene_draw(Scene* self)
     // 绘制技能选单
     SkillSystem_draw_menu(&gs->skill_sys);
 }
-
 
 void game_scene_destroy(Scene* self)
 {

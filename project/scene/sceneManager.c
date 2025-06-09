@@ -24,9 +24,8 @@ void create_scene(SceneType type)
     case WinScene_L:
         scene = New_Winscene(WinScene_L);
         break;
-    case -1:
-        return false;
     default:
+        // Keep current scene if type is invalid
         break;
     }
 }
