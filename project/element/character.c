@@ -70,11 +70,9 @@ Elements* New_Character(int label)
     al_attach_sample_instance_to_mixer(pDerivedObj->atk_Sound, al_get_default_mixer());
 
     // initial the geometric information of character
-    pDerivedObj->hp = 300000;  // 初始血量
     pDerivedObj->width = pDerivedObj->gif_status[0]->width;
     pDerivedObj->height = pDerivedObj->gif_status[0]->height;
     pDerivedObj->x = 300;
-    //pDerivedObj->y = HEIGHT - pDerivedObj->height - 60;
     pDerivedObj->y = HEIGHT / 2;
     pDerivedObj->hitbox = New_Rectangle(
         pDerivedObj->x,
@@ -86,9 +84,10 @@ Elements* New_Character(int label)
     pDerivedObj->state = IDLE;
     pDerivedObj->last_move_dir = 0;
     pDerivedObj->new_proj = false;
-    // 技能相關欄位
-    pDerivedObj->max_hp = 300000;
-    pDerivedObj->hp = 30000;
+    
+    // Initialize health and skills
+    pDerivedObj->max_hp = 100;  // Set a reasonable max HP
+    pDerivedObj->hp = pDerivedObj->max_hp;  // Start with full health
     pDerivedObj->shield_active = false;
     pDerivedObj->speed = 1.0f;
     pDerivedObj->multi_shot = false;
