@@ -44,9 +44,9 @@ Scene* New_GameScene(int label)
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
     _Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
-    _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
-    _Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
-    _Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
+    //_Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
+    //_Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
+    //_Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
     // setting derived object function
     pObj->Update = game_scene_update;
     pObj->Draw = game_scene_draw;
@@ -100,10 +100,11 @@ void game_scene_update(Scene* self)
     // Do NOT redeclare gs here!
 
     ElementVec allEnemies = _Get_all_enemies(self);
-    printf("Enemy count: %d\n", allEnemies.len);
+    //printf("Enemy count: %d\n", allEnemies.len);
 
     if (allEnemies.len == 0) {
         //gs->timer = 0;
+<<<<<<< Updated upstream
         
         ElementVec allEle = _Get_all_elements(self);
         for (int i = 0; i < allEle.len; i++) {
@@ -131,31 +132,66 @@ void game_scene_update(Scene* self)
                 return;
             }
         }        
+=======
+        self->scene_end = true;
+        window = 4;
+        return;
+>>>>>>> Stashed changes
     }
+        //ElementVec allEle = _Get_all_elements(self);
+        // for (int i = 0; i < allEle.len; i++) {
+        //     Elements* ele = allEle.arr[i];
+        //     ele->Destroy(ele);
+        // }
+        // if (gs->background) {
+        //     al_destroy_bitmap(gs->background);
+        //     gs->background = NULL;
+        // }
+        // if (!gs->win_img) {
+        //     gs->win_img = al_load_bitmap("assets/image/win.png");
+        //     gs->win_show = true;
+        //     printf("gs->win_show=true!\n");
+            
+        // }
+        // //where the game crash
+        // //gs->timer += 1.0 / 60.0;
+        // if (!gs->win_show) {
+        //     printf("still can't press ENTER\n");
+        // }
+        // else {
+        //     // key_state[ALLEGRO_KEY_ENTER] = true;
+        //     if (key_state[ALLEGRO_KEY_ENTER]) {
+        //         //gs->timer = 0;
+        //         // 這裡可以切換到下一個場景
+        //         printf("Set window to %d (GameScene2_L)\n", window);
+        //         self->scene_end = true;
+        //         window = 2;
+        //         return;
+        //     }
+        // }
+    
 }
 
 void game_scene_draw(Scene* self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
-    GameScene* gs = ((GameScene*)(self->pDerivedObj));
 
-    
-    // 只顯示 win 畫面
-    if (gs->win_img){
-        al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
-        return;
-    }
-        
+    GameScene* gs = ((GameScene*)(self->pDerivedObj));
+    // // 只顯示 win 畫面
+    // if (gs->win_img){
+    //     al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
+    //     return;
+    // }
 
     // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
-    int chara_x = 0;
+    //int chara_x = 0;
     int chara_y = 0;
     for (int i = 0; i < allEle.len; i++) {
         Elements* ele = allEle.arr[i];
         if (ele->label == Character_L) {
             Character* chara = (Character*)(ele->pDerivedObj);
-            chara_x = chara->x;
+            //chara_x = chara->x;
             chara_y = chara->y;
             break;
         }

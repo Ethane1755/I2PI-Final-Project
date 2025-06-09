@@ -3,7 +3,7 @@
 #include <allegro5/allegro_acodec.h> //
 #include <allegro5/allegro_font.h> //
 #include <allegro5/allegro_ttf.h> //
-#include "gamescene2.h"
+#include "gamescene3.h"
 #include "../element/element.h"
 #include "../element/character.h"
 #include "../element/floor.h"
@@ -25,10 +25,10 @@
 */
 // Character character; //character
 
-Scene* New_GameScene2(int label)
+Scene* New_GameScene3(int label)
 {
-    printf("New_GameScene2 called, label=%d\n", label);
-    GameScene2* pDerivedObj = (GameScene2*)malloc(sizeof(GameScene2));
+    printf("New_GameScene3 called, label=%d\n", label);
+    GameScene3* pDerivedObj = (GameScene3*)malloc(sizeof(GameScene3));
     Scene* pObj = New_Scene(label);
     //printf("New GameScene2 has created.\n");
     // setting derived object member
@@ -42,19 +42,19 @@ Scene* New_GameScene2(int label)
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Ball(Ball_L));
     //_Register_elements(pObj, New_BasicEnemy(BasicEnemy_L, 100, 100));
-   // _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
-    _Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
+    _Register_elements(pObj, New_BulletEnemy(BulletEnemy_L, 200, 200));
+    //_Register_elements(pObj, New_TraceEnemy(TraceEnemy_L, 300, 300));
     //_Register_elements(pObj, New_BossEnemy(BossEnemy_L, 200, 200));
     // setting derived object function
-    pObj->Update = game_scene2_update;
-    pObj->Draw = game_scene2_draw;
-    pObj->Destroy = game_scene2_destroy;
+    pObj->Update = game_scene3_update;
+    pObj->Draw = game_scene3_draw;
+    pObj->Destroy = game_scene3_destroy;
     return pObj;
 }
-void game_scene2_update(Scene* self)
+void game_scene3_update(Scene* self)
 {
-    GameScene2* gs = (GameScene2*)self->pDerivedObj;    
-    
+    GameScene3* gs = (GameScene3*)self->pDerivedObj;
+
     // update every element
     ElementVec allEle = _Get_all_elements(self);
 
@@ -94,10 +94,10 @@ void game_scene2_update(Scene* self)
         if (ele->dele)
             _Remove_elements(self, ele);
     }
-    
+
     ElementVec allEnemies = _Get_all_enemies(self);
 
-    
+
     //gs->timer = 0;  
     if (allEnemies.len == 0) {
         //gs->timer = 0;
@@ -106,35 +106,35 @@ void game_scene2_update(Scene* self)
         return;
     }
 
-        // ElementVec allEle = _Get_all_elements(self);
-        // for (int i = 0; i < allEle.len; i++) {
-        //     Elements* ele = allEle.arr[i];
-        //     ele->Destroy(ele);
-        // }
-        // if (gs->background) {
-        //     al_destroy_bitmap(gs->background);
-        //     gs->background = NULL;
-        // }
-        // if (!gs->win_img)
-        //     gs->win_img = al_load_bitmap("assets/image/win.png");
-        
+    // ElementVec allEle = _Get_all_elements(self);
+    // for (int i = 0; i < allEle.len; i++) {
+    //     Elements* ele = allEle.arr[i];
+    //     ele->Destroy(ele);
+    // }
+    // if (gs->background) {
+    //     al_destroy_bitmap(gs->background);
+    //     gs->background = NULL;
+    // }
+    // if (!gs->win_img)
+    //     gs->win_img = al_load_bitmap("assets/image/win.png");
 
-        // //gs->timer += 1.0 / 60.0; // 假設你每幀呼叫一次，且 FPS=60
-        // if (key_state[ALLEGRO_KEY_ENTER]) {
-        //     //gs->timer = 0;
-        //     self->scene_end = true;
-        //     window = 3;
-        //     return;
-        // }
-    
-    
+
+    // //gs->timer += 1.0 / 60.0; // 假設你每幀呼叫一次，且 FPS=60
+    // if (key_state[ALLEGRO_KEY_ENTER]) {
+    //     //gs->timer = 0;
+    //     self->scene_end = true;
+    //     window = 3;
+    //     return;
+    // }
+
+
 }
 
-void game_scene2_draw(Scene* self)
+void game_scene3_draw(Scene* self)
 {
     //printf("Drawing GameScene2\n");
     al_clear_to_color(al_map_rgb(0, 0, 0));
-    GameScene2* gs = ((GameScene2*)(self->pDerivedObj));
+    GameScene3* gs = ((GameScene3*)(self->pDerivedObj));
 
     // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
@@ -161,7 +161,7 @@ void game_scene2_draw(Scene* self)
         Camera.y = 0;
     if (Camera.y > HEIGHT)
         Camera.y = HEIGHT;
-    
+
     al_draw_bitmap(gs->background, -Camera.x, -Camera.y, 0);
 
     for (int i = 0; i < allEle.len; i++)
@@ -172,9 +172,9 @@ void game_scene2_draw(Scene* self)
     SkillSystem_draw_menu(&gs->skill_sys);
 }
 
-void game_scene2_destroy(Scene* self)
+void game_scene3_destroy(Scene* self)
 {
-    GameScene2* Obj = ((GameScene2*)(self->pDerivedObj));
+    GameScene3* Obj = ((GameScene3*)(self->pDerivedObj));
     ALLEGRO_BITMAP* background = Obj->background;
     al_destroy_bitmap(background);
     ElementVec allEle = _Get_all_elements(self);
