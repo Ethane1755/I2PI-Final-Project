@@ -170,45 +170,54 @@ void Projectile_interact(Elements* self) {
 
 void _Projectile_interact_Enemy(Elements* self, Elements* tar) {
     Projectile* bullet = (Projectile*)(self->pDerivedObj);
-    BasicEnemy* enemy = (BasicEnemy*)(tar->pDerivedObj);
-    
-    // Skip if enemy is invisible (e.g., boss in stealth)
-    if (tar->label == BossEnemy_L && ((BossEnemy*)tar->pDerivedObj)->is_invisible) {
-        return;
-    }
-    
-    // Get enemy center position
-    float enemy_center_x = enemy->x + enemy->width / 2.0f;
-    float enemy_center_y = enemy->y + enemy->height / 2.0f;
-    
-    // Get bullet center position
     float bullet_center_x = bullet->x + bullet->width / 2.0f;
     float bullet_center_y = bullet->y + bullet->height / 2.0f;
+    float enemy_center_x, enemy_center_y;
+    float hit_threshold;
+
+    // Check enemy state before interaction
+    if (tar->label == BossEnemy_L) {
+        BossEnemy* boss = (BossEnemy*)tar->pDerivedObj;
+        // Skip if boss is invisible, dead/dying, or has no health
+        if (boss->is_invisible || boss->state == BOSS_BE_STATE_DIE || boss->hp <= 0) {
+            return;
+        }
+        enemy_center_x = boss->x + boss->width / 2.0f;
+        enemy_center_y = boss->y + boss->height / 2.0f;
+        hit_threshold = boss->width / 4.0f;
+    } else {
+        BasicEnemy* enemy = (BasicEnemy*)tar->pDerivedObj;
+        // Skip if enemy is dead or has no health
+        if (enemy->hp <= 0) {
+            return;
+        }
+        enemy_center_x = enemy->x + enemy->width / 2.0f;
+        enemy_center_y = enemy->y + enemy->height / 2.0f;
+        hit_threshold = enemy->width / 4.0f;
+    }
     
     // Calculate distance to enemy center
     float dx = enemy_center_x - bullet_center_x;
     float dy = enemy_center_y - bullet_center_y;
     float dist = sqrt(dx*dx + dy*dy);
     
-    // Check if bullet is close enough to enemy center (using a small threshold)
-    float hit_threshold = enemy->width / 4.0f; // Adjust this value to control how close to center
-    
+    // Check if bullet hit the enemy
     if (dist <= hit_threshold) {
-        // Calculate knockback direction from center
+        // Calculate knockback direction
         if (dist > 0) {
             dx = (dx/dist) * 30;
             dy = (dy/dist) * 30;
         }
         
-        // Apply damage and knockback based on enemy type
-        if (tar->label == BasicEnemy_L) {
-            BasicEnemy_take_damage(tar, 1, dx, dy);
+        // Apply damage based on enemy type
+        if (tar->label == BossEnemy_L) {
+            BossEnemy_interact(tar);
         } else if (tar->label == BulletEnemy_L) {
             BulletEnemy_take_damage(tar, 1, dx, dy);
         } else if (tar->label == TraceEnemy_L) {
             TraceEnemy_take_damage(tar, 1, dx, dy);
-        } else if (tar->label == BossEnemy_L) {
-            BossEnemy_interact(tar); // Boss has its own damage handling
+        } else if (tar->label == BasicEnemy_L) {
+            BasicEnemy_take_damage(tar, 1, dx, dy);
         }
         
         // Destroy the projectile on hit
