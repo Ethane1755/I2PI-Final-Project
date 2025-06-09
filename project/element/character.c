@@ -213,7 +213,7 @@ void Character_draw(Elements* self)
     ALLEGRO_BITMAP* frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     int draw_x = chara->x+20 ;
     int draw_y = chara->y - chara->height / 2 - 10;
-    int weapon_x = chara->x + chara->width / 2 - 25;
+    int weapon_x = chara->x + chara->width / 2 - 35;
     int weapon_y = chara->y - chara->height / 3 + 10;
 
     // 判斷有沒有 last_proj
