@@ -101,9 +101,10 @@ void game_scene_update(Scene* self)
     }
 
     ElementVec allEnemies = _Get_all_enemies(self);
-    printf("Enemy count: %d\n", allEnemies.len);
+    //printf("Enemy count: %d\n", allEnemies.len);
 
     if (allEnemies.len == 0) {
+
         // Only do this once when enemies are first cleared
         if (!gs->win_show) {
             printf("All enemies defeated! Transitioning to win screen...\n");
@@ -120,6 +121,21 @@ void game_scene_update(Scene* self)
                 al_destroy_bitmap(gs->background);
                 gs->background = NULL;
             }
+
+
+        //gs->timer = 0;
+
+        
+        ElementVec allEle = _Get_all_elements(self);
+        for (int i = 0; i < allEle.len; i++) {
+            Elements* ele = allEle.arr[i];
+            ele->Destroy(ele);
+        }
+        if (gs->background) {
+            al_destroy_bitmap(gs->background);
+            gs->background = NULL;
+        }
+        if (!gs->win_img) {
 
             gs->win_img = al_load_bitmap("assets/image/win.png");
             if (!gs->win_img) {
@@ -200,6 +216,7 @@ void draw_health_bar(int x, int y, int width, int height, float current_hp, floa
             if (!font) {
                 font = al_create_builtin_font();
             }
+
         }
         if (font) {
             char hp_text[32];
@@ -212,7 +229,44 @@ void draw_health_bar(int x, int y, int width, int height, float current_hp, floa
             al_draw_text(font, al_map_rgb(255, 255, 255), x + width/2, y + height/2 - 6,
                         ALLEGRO_ALIGN_CENTER, hp_text);
         }
+
+        self->scene_end = true;
+        window = 4;
+        return;
+
     }
+        //ElementVec allEle = _Get_all_elements(self);
+        // for (int i = 0; i < allEle.len; i++) {
+        //     Elements* ele = allEle.arr[i];
+        //     ele->Destroy(ele);
+        // }
+        // if (gs->background) {
+        //     al_destroy_bitmap(gs->background);
+        //     gs->background = NULL;
+        // }
+        // if (!gs->win_img) {
+        //     gs->win_img = al_load_bitmap("assets/image/win.png");
+        //     gs->win_show = true;
+        //     printf("gs->win_show=true!\n");
+            
+        // }
+        // //where the game crash
+        // //gs->timer += 1.0 / 60.0;
+        // if (!gs->win_show) {
+        //     printf("still can't press ENTER\n");
+        // }
+        // else {
+        //     // key_state[ALLEGRO_KEY_ENTER] = true;
+        //     if (key_state[ALLEGRO_KEY_ENTER]) {
+        //         //gs->timer = 0;
+        //         // 這裡可以切換到下一個場景
+        //         printf("Set window to %d (GameScene2_L)\n", window);
+        //         self->scene_end = true;
+        //         window = 2;
+        //         return;
+        //     }
+        // }
+    
 }
 // 在 game_scene_draw 函数中，修改敌人血条绘制部分
 
@@ -241,15 +295,22 @@ void game_scene_draw(Scene* self)
         return;
     }
 
+    GameScene* gs = ((GameScene*)(self->pDerivedObj));
+    // // 只顯示 win 畫面
+    // if (gs->win_img){
+    //     al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
+    //     return;
+    // }
+
     // 获取角色坐标进行摄影机计算
     ElementVec allEle = _Get_all_elements(self);
-    int chara_x = 0;
+    //int chara_x = 0;
     int chara_y = 0;
     for (int i = 0; i < allEle.len; i++) {
         Elements* ele = allEle.arr[i];
         if (ele->label == Character_L) {
             Character* chara = (Character*)(ele->pDerivedObj);
-            chara_x = chara->x;
+            //chara_x = chara->x;
             chara_y = chara->y;
             break;
         }

@@ -210,6 +210,9 @@ bool game_update(Game *self)
             printf("Creating Game Scene 3\n");
             create_scene(GameScene3_L);
             break;
+        case 4:
+            create_scene(WinScene_L);
+            break;
         case -1:
             printf("Exiting game\n");
             return false;
