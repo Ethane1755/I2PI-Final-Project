@@ -5,6 +5,7 @@
 #include "../shapes/Rectangle.h"
 #include "../scene/sceneManager.h"
 #include "../scene/gamescene.h"
+#include "../element/character.h"
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
@@ -120,11 +121,10 @@ void BasicEnemy_interact(Elements *self) {
         if (ele->label == Character_L) {
             Character *c = ele->pDerivedObj;
             if (e->hitbox->overlap(e->hitbox, c->hitbox) && now - e->last_damage_time > 0.5) {
-                c->hp -= e->damage;
+                Character_take_damage(ele, e->damage);
                 e->last_damage_time = now;
                 e->state = BE_STATE_ATTACK;
                 e->frame = 0;
-                printf("Player hit! HP: %d\n", c->hp);
             }
         } else if (ele->label == Projectile_L) {
             Projectile *p = ele->pDerivedObj;

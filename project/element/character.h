@@ -15,22 +15,31 @@ typedef enum CharacterType
     UP, DOWN, LEFT, RIGHT,
     DIE
 } CharacterType;
+
 typedef struct _Character
 {
     int x, y;
     int width, height;              // the width and height of image
     bool dir;                       // true: face to right, false: face to left
     int state;                      // the state of character
-    ALGIF_ANIMATION *gif_status[7]; // gif for each state. 0: stop, 1: move, 2:attack
+    ALGIF_ANIMATION *gif_status[7];
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
-    int anime;      // counting the time of animation
-    int anime_time; // indicate how long the animation
+    int anime;
+    int anime_time;
     bool new_proj;
-    Shape *hitbox; // the hitbox of object
-    int hp;        // 玩家血量
+    Shape *hitbox;
+    int hp;
     int last_move_dir;
     float weapon_angle;
-    struct _Projectile *last_proj; // 新增這一行
+    struct _Projectile *last_proj;
+    int max_hp;
+    bool shield_active;
+    float speed;
+    bool multi_shot;
+    int multishot_level;
+    bool pending_multishot;         // <-- add this
+    double last_multishot_time;     // <-- add this
+    int multishot_shots_left;
 } Character;
 
 Elements *New_Character(int label);

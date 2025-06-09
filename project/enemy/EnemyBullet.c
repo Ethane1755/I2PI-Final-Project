@@ -82,7 +82,7 @@ void _EnemyBullet_interact_Character(Elements *self, Elements *tar) {
     Character *character = (Character *)(tar->pDerivedObj);
     
     if (character->hitbox->overlap(character->hitbox, bullet->hitbox)) {
-        character->hp -= 2; // 子彈傷害在這裡調!!
+        Character_take_damage(tar, 2); // 子彈傷害在這裡調!!
         printf("Player hit by enemy bullet! HP: %d\n", character->hp);
         self->dele = true; 
     }

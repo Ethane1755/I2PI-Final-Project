@@ -1,6 +1,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
 #include "character.h"
 #include "projectile.h"
 #include "weapon.h"
@@ -14,6 +15,7 @@
 #include "../enemy/TraceEnemy.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h> // for ALLEGRO_PI
 
 ElementVec _Get_all_the_enemies(Scene* scene) {
     ElementVec allEnemies;
@@ -80,6 +82,17 @@ Elements* New_Character(int label)
     pDerivedObj->state = IDLE;
     pDerivedObj->last_move_dir = 0;
     pDerivedObj->new_proj = false;
+    // 技能相關欄位
+    pDerivedObj->max_hp = 300000;
+    pDerivedObj->hp = 30000;
+    pDerivedObj->shield_active = false;
+    pDerivedObj->speed = 1.0f;
+    pDerivedObj->multi_shot = false;
+    pDerivedObj->multishot_level = 0;
+    pDerivedObj->pending_multishot = false;
+    pDerivedObj->last_multishot_time = 0;
+    pDerivedObj->multishot_shots_left = 0;
+    pDerivedObj->last_proj = NULL;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Draw = Character_draw;
@@ -94,26 +107,27 @@ void Character_update(Elements* self) {
     // 使用 last_move_dir 來記錄上一幀的上下移動
     // 0: 無, 1: 上, 2: 下
     // 優先判斷移動鍵
+    int move_speed = (int)(5 * chara->speed);
     if (key_state[ALLEGRO_KEY_W]) {
         chara->dir = false;
-        _Character_update_position(self, 0, -5);
+        _Character_update_position(self, 0, -move_speed);
         chara->last_move_dir = 1; // 上
         chara->state = UP;
     }
     else if (key_state[ALLEGRO_KEY_A]) {
         chara->dir = false;
-        _Character_update_position(self, -5, 0);
+        _Character_update_position(self, -move_speed, 0);
         chara->state = LEFT;
     }
     else if (key_state[ALLEGRO_KEY_S]) {
         chara->dir = false;
-        _Character_update_position(self, 0, 5);
+        _Character_update_position(self, 0, move_speed);
         chara->last_move_dir = 2; // 下
         chara->state = DOWN;
     }
     else if (key_state[ALLEGRO_KEY_D]) {
         chara->dir = false;
-        _Character_update_position(self, 5, 0);
+        _Character_update_position(self, move_speed, 0);
         chara->state = RIGHT;
     }
     else {
@@ -142,6 +156,11 @@ void Character_update(Elements* self) {
                     (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
                     Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
                     chara->new_proj = true;
+                    if (chara->multi_shot && chara->multishot_level > 0) {
+                        chara->pending_multishot = true;
+                        chara->last_multishot_time = al_get_time();
+                        chara->multishot_shots_left = chara->multishot_level;
+                    }
                 }
                 if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
                     (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
@@ -155,6 +174,11 @@ void Character_update(Elements* self) {
                     (chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 0 && chara->new_proj == false)) {
                     Character_fire_projectile(chara, chara->state); // <-- 呼叫 weapon.c 的函式
                     chara->new_proj = true;
+                    if (chara->multi_shot && chara->multishot_level > 0) {
+                        chara->pending_multishot = true;
+                        chara->last_multishot_time = al_get_time();
+                        chara->multishot_shots_left = chara->multishot_level;
+                    }
                 }
                 if ((chara->gif_status[IDLE] && chara->gif_status[IDLE]->done) ||
                     (chara->gif_status[IDLED] && chara->gif_status[IDLED]->done)) {
@@ -163,12 +187,19 @@ void Character_update(Elements* self) {
             }
         }
     }
-    /*
-// 動畫結束自動回到IDLE
-if (chara->gif_status[chara->state] && chara->gif_status[chara->state]->done) {
-    chara->state = IDLE;
-}
-*/
+
+    // Multi Shot: fire another projectile after 0.1s
+    if (chara->multi_shot && chara->pending_multishot && chara->multishot_shots_left > 0) {
+        if (al_get_time() - chara->last_multishot_time >= 0.1) {
+            Character_fire_projectile(chara, chara->state);
+            chara->last_multishot_time = al_get_time();
+            chara->multishot_shots_left--;
+            if (chara->multishot_shots_left == 0) {
+                chara->pending_multishot = false;
+            }
+        }
+    }
+
     if (chara->hp <= 0) {
         chara->state = DIE;
         if (chara->gif_status[DIE] && chara->gif_status[DIE]->done)
@@ -182,37 +213,51 @@ void Character_draw(Elements* self)
     ALLEGRO_BITMAP* frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     int draw_x = chara->x+20 ;
     int draw_y = chara->y - chara->height / 2 - 10;
-    int weapon_x = chara->x + chara->width / 2 - 30;
+    int weapon_x = chara->x + chara->width / 2 - 25;
     int weapon_y = chara->y - chara->height / 3 + 10;
 
-    if (chara->state == IDLE && chara->last_proj) {
-        // idle 狀態：武器在角色後面
-        Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
+    // 判斷有沒有 last_proj
+    float weapon_angle = 0;
+    bool has_proj = (chara->last_proj != NULL);
+
+    if (chara->state == IDLE) {
+        if (has_proj)
+            weapon_angle = chara->last_proj->angle; // 跟 bullet 方向
+        else
+            weapon_angle = -ALLEGRO_PI / 2; // 預設朝上
+        Weapon_draw_rotated(weapon_x, weapon_y, weapon_angle);
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
-    else if (chara->state == IDLED && chara->last_proj) {
-        // idled 狀態：武器在角色前面
+    else if (chara->state == IDLED) {
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
-        Weapon_draw_rotated(weapon_x, weapon_y, chara->last_proj->angle);
+        if (has_proj)
+            weapon_angle = chara->last_proj->angle; // 跟 bullet 方向
+        else
+            weapon_angle = ALLEGRO_PI / 2; // 預設朝下
+        Weapon_draw_rotated(weapon_x, weapon_y, weapon_angle);
     }
     else {
-        // 其他狀態只畫角色
         if (frame)
             al_draw_bitmap(frame, draw_x, draw_y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
 
-    //BossEnemy* e = self->pDerivedObj;
+    if (chara->shield_active) {
+        static ALLEGRO_BITMAP* shield_img = NULL;
+        if (!shield_img)
+            shield_img = al_load_bitmap("assets/image/shield.png");
+        if (shield_img)
+            al_draw_tinted_bitmap(shield_img, al_map_rgba_f(1,1,1,0.5), chara->x, chara->y - chara->height / 2, 0);
+    }
+
     // idle動畫到特定幀時播放攻擊音效
-    //if (e->state != BOSS_BE_STATE_STEALTH_OUT) {
     if ((chara->state == IDLE && chara->gif_status[IDLE] && chara->gif_status[IDLE]->display_index == 2 && chara->atk_Sound) ||
         (chara->state == IDLED && chara->gif_status[IDLED] && chara->gif_status[IDLED]->display_index == 2 && chara->atk_Sound))
     {
         al_play_sample_instance(chara->atk_Sound);
     }
 }
-//}
 
 void Character_destory(Elements* self)
 {
@@ -231,32 +276,30 @@ void Character_destory(Elements* self)
 void _Character_update_position(Elements* self, int dx, int dy)
 {
     Character* chara = ((Character*)(self->pDerivedObj));
-    // GameScene* gs = ((GameScene*)(self->pDerivedObj));
-    // int map_height = al_get_bitmap_height(gs->background);
-    // chara->x += dx;
-    // chara->y += dy;
-    // Shape *hitbox = chara->hitbox;
-    // if (hitbox) {
-    //     hitbox->update_center_x(hitbox, dx);
-    //     hitbox->update_center_y(hitbox, dy);
-    // }
     int new_x = chara->x + dx;
     int new_y = chara->y + dy;
 
     // 限制角色活動範圍
-    // 圖片高度為1024
     if (new_x < -16) new_x = -16;
-    //if (new_x > WIDTH - chara->width) new_x = WIDTH - chara->width;
     if (new_x > 768) new_x = 768;
     if (new_y < 16) new_y = 16;
     if (new_y > HEIGHT-10) new_y = HEIGHT-10;
-    //if (new_y > HEIGHT - chara->height) new_y = HEIGHT - chara->height;
-    //if (new_y > HEIGHT+60 - chara->height) new_y = HEIGHT+60 - chara->height;
-    //if (new_y > map_height - chara->height) new_y = map_height - chara->height;
 
     chara->x = new_x;
     chara->y = new_y;
 }
 
+void Character_take_damage(Elements* self, int damage) {
+    Character* chara = (Character*)(self->pDerivedObj);
+    if (chara->shield_active) {
+        chara->shield_active = false;
+        printf("Shield blocked the attack!\n");
+    } else {
+        chara->hp -= damage;
+        printf("Player hit! HP: %d\n", chara->hp);
+    }
+}
+
 void Character_interact(Elements* self) {
+    // 角色互動目前無需實作
 }

@@ -12,6 +12,7 @@
 #include "../enemy/TraceEnemy.h"
 #include "../enemy/TracingBullet.h"
 #include "../enemy/BossEnemy.h"
+#include "../element/skill.h"
 /*
    [GameScene function]
 */
@@ -25,6 +26,7 @@ Scene* New_GameScene(int label)
     Scene* pObj = New_Scene(label);
     // setting derived object member
     pDerivedObj->background = al_load_bitmap("assets/image/firstmap.png");
+    SkillSystem_init(&pDerivedObj->skill_sys);
     pObj->pDerivedObj = pDerivedObj;
     // register element
     //_Register_elements(pObj, New_Floor(Floor_L));
@@ -42,10 +44,31 @@ Scene* New_GameScene(int label)
     pObj->Destroy = game_scene_destroy;
     return pObj;
 }
+
 void game_scene_update(Scene* self)
 {
-    // update every element
+    GameScene* gs = (GameScene*)self->pDerivedObj;
     ElementVec allEle = _Get_all_elements(self);
+
+    // 先找到 player
+    Elements* player_ele = NULL;
+    for (int i = 0; i < allEle.len; i++) {
+        if (allEle.arr[i]->label == Character_L) {
+            player_ele = allEle.arr[i];
+            break;
+        }
+    }
+    if (player_ele) {
+        Character* player = (Character*)(player_ele->pDerivedObj);
+        SkillSystem_update(&gs->skill_sys, player);
+    }
+
+    // 技能選單開啟時，暫停所有遊戲行為
+    if (gs->skill_sys.selecting) {
+        return;
+    }
+
+    // update every element
     for (int i = 0; i < allEle.len; i++)
     {
         Elements* ele = allEle.arr[i];
@@ -65,7 +88,7 @@ void game_scene_update(Scene* self)
             _Remove_elements(self, ele);
     }
 
-    GameScene* gs = (GameScene*)self->pDerivedObj;
+    // 狀態機
     if (gs->state == 0) {
         // ...原本的遊戲邏輯
         // if (enemynumber == 0) { // 等黎寫完有幾隻怪物再改
@@ -144,6 +167,7 @@ void game_scene_draw(Scene* self)
         Elements* ele = allEle.arr[i];
         ele->Draw(ele);
     }
+    SkillSystem_draw_menu(&gs->skill_sys);
 }
 
 // void game_scene_draw(Scene* self)
