@@ -43,6 +43,7 @@ void SkillSystem_start_select(SkillSystem* sys) {
 
 void SkillSystem_update(SkillSystem* sys, Character* player) {
     double now = al_get_time();
+    // 只有在沒選技能時才計時
     if (!sys->selecting && now - sys->last_select_time > 5) {
         SkillSystem_start_select(sys);
     }
@@ -55,6 +56,7 @@ void SkillSystem_update(SkillSystem* sys, Character* player) {
                 sys->selecting = false;
                 SkillSystem_apply(sys, player);
                 printf("Selected skill: %s\n", skill_names[sys->selected_skill]);
+                sys->last_select_time = now; // 技能選完後重設計時
             }
         }
         // Mouse click selection
@@ -70,6 +72,7 @@ void SkillSystem_update(SkillSystem* sys, Character* player) {
                     sys->selecting = false;
                     SkillSystem_apply(sys, player);
                     printf("Selected skill: %s\n", skill_names[sys->selected_skill]);
+                    sys->last_select_time = now; // 技能選完後重設計時
                 }
             }
         }
@@ -91,21 +94,23 @@ void SkillSystem_draw_menu(SkillSystem* sys) {
         char img_path[64];
         sprintf(img_path, "assets/image/skill_%d.png", sys->options[i]);
         ALLEGRO_BITMAP* bmp = al_load_bitmap(img_path);
-        int x = 225 + i * 225;
+        int x = 165 + i * 225;
         int y = 200;
+        int center_x = x + 60;
+        int center_y = y + 60;
+        // 先畫底圖（正方形，白色半透明）
+        al_draw_filled_rectangle(center_x - 60, center_y - 60, center_x + 60, center_y + 60, al_map_rgba(255,255,255,180));
         if (bmp) {
             int img_w = al_get_bitmap_width(bmp);
             int img_h = al_get_bitmap_height(bmp);
-            int x_center = x;
-            int y_center = y + 60;
-            al_draw_bitmap(bmp, x_center - img_w/2, y_center - img_h/2, 0);
+            al_draw_bitmap(bmp, center_x - img_w/2, center_y - img_h/2, 0);
             al_destroy_bitmap(bmp);
         } else {
             al_draw_filled_rectangle(x, y, x+120, y+120, al_map_rgb(80,80,80));
         }
-        al_draw_textf(font, al_map_rgb(255,255,0), x, y + 170, ALLEGRO_ALIGN_CENTER, "%s", skill_names[sys->options[i]]);
-        al_draw_textf(font, al_map_rgb(255,255,255), x, y + 210, ALLEGRO_ALIGN_CENTER, "Press %d", i+1);
-    }  
+        al_draw_textf(font, al_map_rgb(255,255,0), center_x, y + 170, ALLEGRO_ALIGN_CENTER, "%s", skill_names[sys->options[i]]);
+        al_draw_textf(font, al_map_rgb(255,255,255), center_x, y + 210, ALLEGRO_ALIGN_CENTER, "Press %d", i+1);
+    }
     al_draw_text(font, al_map_rgb(255,255,0), 450, 120, ALLEGRO_ALIGN_CENTER, "Choose a skill!");
 }
 
