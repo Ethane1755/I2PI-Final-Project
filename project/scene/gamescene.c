@@ -116,7 +116,27 @@ void game_scene_draw(Scene* self)
 
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
     
-    // 取得角色座標
+    // // 显示胜利画面
+    // ElementVec allEnemies = _Get_all_enemies(self);
+    // if (allEnemies.len == 0) {
+    //     al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, 
+    //                     (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
+    // } else {
+    //     static ALLEGRO_FONT* font = NULL;
+    //     if (!font) {
+    //         font = al_create_builtin_font();
+    //     }
+    //     if (font) {
+    //         al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 - 20,
+    //                     ALLEGRO_ALIGN_CENTER, "Victory!");
+    //         al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2 + 20,
+    //                     ALLEGRO_ALIGN_CENTER, "Press Enter to continue");
+    //     }
+    // }
+    // return;
+    
+
+    // 获取角色坐标进行摄影机计算
     ElementVec allEle = _Get_all_elements(self);
     //int chara_x = 0;
     int chara_y = 0;
