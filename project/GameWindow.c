@@ -138,6 +138,9 @@ bool game_update(Game *self)
         case 3:
             create_scene(GameScene3_L);
             break;
+        case 4:
+            create_scene(WinScene_L);
+            break;
         case -1:
             return false;
         default:
