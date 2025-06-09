@@ -43,5 +43,6 @@ Scene *New_Scene(int label);
 void _Register_elements(Scene *scene, Elements *ele);
 void _Remove_elements(Scene *scene, Elements *ele);
 ElementVec _Get_all_elements(Scene *scene);
-ElementVec _Get_label_elements(Scene *scene, int label);
+ElementVec _Get_label_elements(Scene* scene, int label);
+void change_scene(Scene* next_scene);
 #endif

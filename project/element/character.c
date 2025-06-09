@@ -14,6 +14,7 @@
 #include "../enemy/TraceEnemy.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "elementLabel.h"
 
 ElementVec _Get_all_the_enemies(Scene* scene) {
     ElementVec allEnemies;

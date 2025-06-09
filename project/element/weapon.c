@@ -5,6 +5,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <math.h>
+#include "elementLabel.h"
 
 static ALGIF_ANIMATION *weapon_gif = NULL;
 

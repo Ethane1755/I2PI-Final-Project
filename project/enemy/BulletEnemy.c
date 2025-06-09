@@ -9,6 +9,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
 #include <stdio.h>
+#include "../element/elementLabel.h"
 
 Elements *New_BulletEnemy(int label, int x, int y) {
     BulletEnemy *enemy = malloc(sizeof(BulletEnemy));

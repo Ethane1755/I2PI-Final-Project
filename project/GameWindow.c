@@ -131,6 +131,13 @@ bool game_update(Game *self)
         case 1:
             create_scene(GameScene_L);
             break;
+        case 2:
+            printf("Creating GameScene2\n");
+            create_scene(GameScene2_L);
+            break;
+        case 3:
+            create_scene(GameScene3_L);
+            break;
         case -1:
             return false;
         default:

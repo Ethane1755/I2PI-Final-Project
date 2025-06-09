@@ -8,6 +8,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
 #include <stdio.h>
+#include "../element/elementLabel.h"
 
 Elements *New_TracingBullet(int label, float x, float y, float vx, float vy) {
     TracingBullet *bullet = malloc(sizeof(TracingBullet));

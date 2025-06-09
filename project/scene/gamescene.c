@@ -1,4 +1,8 @@
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_primitives.h> //
+#include <allegro5/allegro_acodec.h> //
+#include <allegro5/allegro_font.h> //
+#include <allegro5/allegro_ttf.h> //
 #include "gamescene.h"
 #include "../element/element.h"
 #include "../element/character.h"
@@ -12,6 +16,9 @@
 #include "../enemy/TraceEnemy.h"
 #include "../enemy/TracingBullet.h"
 #include "../enemy/BossEnemy.h"
+#include "../element/projectile.h"
+#include "../element/elementLabel.h"
+#include "scene.h"
 /*
    [GameScene function]
 */
@@ -21,6 +28,7 @@
 
 Scene* New_GameScene(int label)
 {
+    //printf("label=%d\n", label);
     GameScene* pDerivedObj = (GameScene*)malloc(sizeof(GameScene));
     Scene* pObj = New_Scene(label);
     // setting derived object member
@@ -66,28 +74,41 @@ void game_scene_update(Scene* self)
     }
 
     GameScene* gs = (GameScene*)self->pDerivedObj;
-    if (gs->state == 0) {
-        // ...原本的遊戲邏輯
-        // if (enemynumber == 0) { // 等黎寫完有幾隻怪物再改
-        //     gs->state = 1;
-        //     gs->timer = 0;
-        // }  
-    }
-    else if (gs->state == 1) {
-        gs->timer += 1.0 / 60.0; // 假設你每幀呼叫一次，且 FPS=60
-        if (gs->timer >= 5.0) {
-            gs->state = 2;
-            gs->timer = 0;
-            if (!gs->win_img)
-                gs->win_img = al_load_bitmap("assets/image/win.png");
+    
+    ElementVec allEnemies = _Get_all_enemies(self);
+    printf("Enemy count: %d\n", allEnemies.len);
+
+    if (allEnemies.len == 0) {
+        //gs->timer = 0;
+        
+        ElementVec allEle = _Get_all_elements(self);
+        for (int i = 0; i < allEle.len; i++) {
+            Elements* ele = allEle.arr[i];
+            ele->Destroy(ele);
         }
-    }
-    else if (gs->state == 2) {
-        gs->timer += 1.0 / 60.0;
-        if (gs->timer >= 5.0) {
-            // 切換到下一個場景或結束遊戲
-            // change_scene(create_menu_scene());
+        if (gs->background) {
+            al_destroy_bitmap(gs->background);
+            gs->background = NULL;
         }
+        if (!gs->win_img) {
+            gs->win_img = al_load_bitmap("assets/image/win.png");
+            gs->win_show = true;
+            printf("gs->win_show=true!\n");
+        }
+            
+    
+        //gs->timer += 1.0 / 60.0;
+        if (gs->win_show) {
+            if (key_state[ALLEGRO_KEY_ENTER]) {
+                //gs->timer = 0;
+                // 這裡可以切換到下一個場景
+                printf("Set window to %d (GameScene2_L)\n", window);
+                self->scene_end = true;
+                window = 2;
+                //printf("Set window to %d (GameScene2_L)\n", window);
+                return;
+            }
+        }        
     }
 }
 
@@ -95,6 +116,14 @@ void game_scene_draw(Scene* self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     GameScene* gs = ((GameScene*)(self->pDerivedObj));
+
+    
+    // 只顯示 win 畫面
+    if (gs->win_img){
+        al_draw_bitmap(gs->win_img, (WIDTH - al_get_bitmap_width(gs->win_img)) / 2, (HEIGHT - al_get_bitmap_height(gs->win_img)) / 2, 0);
+        return;
+    }
+        
 
     // 取得角色座標
     ElementVec allEle = _Get_all_elements(self);
@@ -110,7 +139,7 @@ void game_scene_draw(Scene* self)
         }
     }
 
-    printf("Character position: (%d, %d)\n", chara_x, chara_y);
+    //printf("Character position: (%d, %d)\n", chara_x, chara_y);
 
     // 計算 Camera
     Point Camera;

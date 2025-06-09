@@ -5,6 +5,7 @@
     "files.associations": {
         "tree.h": "c",
         "allegro.h": "c",
-        "gamescene.h": "c"
+        "gamescene.h": "c",
+        "math.h": "c"
     }
 }
